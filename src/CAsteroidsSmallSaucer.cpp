@@ -1,8 +1,7 @@
-#include <CAsteroidsLibI.h>
+#include <CAsteroidsSmallSaucer.h>
 
 CAsteroidsSmallSaucer::
-CAsteroidsSmallSaucer(const CAsteroids &app, double x, double y,
-                      double dx, double dy) :
- CAsteroidsSaucer(app, x, y, dx, dy, CASTEROIDS_SMALL_SAUCER)
+CAsteroidsSmallSaucer(const CAsteroids &app) :
+ CAsteroidsSaucer(app, CAsteroidsSaucerType::SMALL)
 {
 }

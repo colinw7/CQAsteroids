@@ -1,77 +1,68 @@
-#include <CAsteroidsLibI.h>
+#include <CAsteroidsShip.h>
+#include <CAsteroidsBullet.h>
+#include <CAsteroidsRock.h>
+#include <CAsteroidsSaucer.h>
+#include <CAsteroidsExplosion.h>
+#include <CAsteroids.h>
+#include <CAsteroidsShapeMgr.h>
 #include <CMathRand.h>
 
-CPoint2D
 CAsteroidsShip::
-draw_coords_[] = {
-  CPoint2D( 0.5,  0.0),
-  CPoint2D(-0.5,  0.5),
-  CPoint2D(-0.3,  0.0),
-  CPoint2D(-0.5, -0.5),
-};
-
-CPoint2D
-CAsteroidsShip::
-collision_coords_[] = {
-  CPoint2D( 0.5,  0.0),
-  CPoint2D(-0.5,  0.5),
-  CPoint2D(-0.3,  0.0),
-  CPoint2D(-0.5, -0.5),
-};
-
-uint CAsteroidsShip::num_draw_coords_      = sizeof(draw_coords_)/sizeof(CPoint2D);
-uint CAsteroidsShip::num_collision_coords_ = sizeof(collision_coords_)/sizeof(CPoint2D);
-
-CAsteroidsShip::
-CAsteroidsShip(const CAsteroids &app, double x, double y, double a,
-               double dx, double dy, double da) :
- CAsteroidsObject(app, x, y, a, dx, dy, da, 0.1, 0, true),
- bullet_mgr_(app), visible_(true)
+CAsteroidsShip(const CAsteroids &app, const CPoint2D &p, double a,
+               const CVector2D &v, double da) :
+ CAsteroidsObject(app, CAsteroidsObject::Type::SHIP, p, a, v, da, 0.1, 0, true)
 {
-  if (! app_.getConfigValue("Ship", "size", size_))
-    size_ = 0.03;
+  bulletMgr_ = new CAsteroidsBulletMgr(app, this);
 
-  if (! app_.getConfigValue("Ship", "rotateSpeed", rotateSpeed_))
-    rotateSpeed_ = 0.008;
+  size_ = 0.03;
 
-  if (! app_.getConfigValue("Ship", "thrust", thrust_))
-    thrust_ = 0.003;
+  (void) app_.getConfigValue("Ship", "size"       , size_       );
+  (void) app_.getConfigValue("Ship", "rotateSpeed", rotateSpeed_);
+  (void) app_.getConfigValue("Ship", "thrust"     , thrust_     );
+  (void) app_.getConfigValue("Ship", "thrustMax"  , thrustMax_  );
+  (void) app_.getConfigValue("Ship", "bulletSize" , bulletSize_ );
+  (void) app_.getConfigValue("Ship", "bulletSpeed", bulletSpeed_);
+  (void) app_.getConfigValue("Ship", "bulletLife" , bulletLife_ );
+  (void) app_.getConfigValue("Ship", "bulletNum"  , bulletNum_  );
 
-  if (! app_.getConfigValue("Ship", "thrustMax", thrustMax_))
-    thrustMax_ = 0.01;
+  //---
 
-  if (! app_.getConfigValue("Ship", "bulletSize", bulletSize_))
-    bulletSize_ = 0.01;
+  color_ = CRGBA(0.9, 0.9, 0.0);
 
-  if (! app_.getConfigValue("Ship", "bulletSpeed", bulletSpeed_))
-    bulletSpeed_ = 0.01;
+  auto shape_mgr = CAsteroidsShapeMgrInst;
 
-  if (! app_.getConfigValue("Ship", "bulletLife", bulletLife_))
-    bulletLife_ = 0.6;
+  setDrawCoords     (shape_mgr->drawPoints     (CAsteroidsShapeMgr::Type::SHIP));
+  setCollisionCoords(shape_mgr->collisionPoints(CAsteroidsShapeMgr::Type::SHIP));
+}
 
-  if (! app_.getConfigValue("Ship", "bulletNum", bulletNum_))
-    bulletNum_ = 4;
-
-  ai_ = 0;
-
-  setDrawCoords(draw_coords_, num_draw_coords_);
-
-  setCollisionCoords(collision_coords_, num_collision_coords_);
+CAsteroidsShip::
+~CAsteroidsShip()
+{
+  delete bulletMgr_;
 }
 
 void
 CAsteroidsShip::
 init()
 {
-  ai_ = 0;
+  resetPosition();
 
-  x_ = 0.5;
-  y_ = 0.5;
-  a_ = 0;
+  visible_ = true;
 
-  dx_ = 0;
-  dy_ = 0;
-  da_ = 0;
+  exploding_   = 0;
+  invunerable_ = 0;
+}
+
+void
+CAsteroidsShip::
+resetPosition()
+{
+  p_ = CPoint2D (0.5, 0.5);
+  v_ = CVector2D(0.0, 0.0);
+  a_ = CVector2D(0.0, 0.0);
+
+  angle_ = 0;
+  da_    = 0;
 
   matrix_.setIdentity();
 }
@@ -80,119 +71,217 @@ void
 CAsteroidsShip::
 intersect()
 {
-  if (! visible_) return;
+  if (! isVisible() || exploding_ > 0 || invunerable_ > 0) return;
 
-  auto rocks = app_.getRockMgr()->getRocks();
+  bool hit = false;
 
-  for (auto prock = rocks.begin(); prock != rocks.end(); ++prock) {
-    if (! (*prock)->getRemove() && (*prock)->pointInside(x_, y_)) {
-      (*prock)->hit();
+  for (const auto &rock : app_.getRockMgr()->getRocks()) {
+    if (! rock->isRemove() && rock->intersectObj(this)) {
+      rock->hit();
 
-      app_.shipDestroyed();
-
-      init();
+      hit = true;
 
       break;
     }
   }
 
-  bullet_mgr_.intersect();
+  CAsteroidsSaucer *saucer = app_.getSaucerMgr()->getVisibleSaucer();
+
+  if (saucer && saucer->intersectObj(this)) {
+    saucer->hit();
+
+    hit = true;
+  }
+
+  if (hit)
+    destroy();
+
+  //---
+
+  bulletMgr_->intersect();
+}
+
+void
+CAsteroidsShip::
+destroy()
+{
+  if (! isVisible() || exploding_ > 0 || invunerable_ > 0) return;
+
+  app_.shipDestroyed();
+
+  exploding_ = 50;
+
+  app_.getExplosionMgr()->addExplosion(this, p_);
 }
 
 void
 CAsteroidsShip::
 turnLeft()
 {
-  if (! visible_) return;
+  if (! isVisible() || exploding_ > 0) return;
 
-  a_ += rotateSpeed_;
+  da_ = rotateSpeed_;
 }
 
 void
 CAsteroidsShip::
 turnRight()
 {
-  if (! visible_) return;
+  if (! isVisible() || exploding_ > 0) return;
 
-  a_ -= rotateSpeed_;
+  da_ = -rotateSpeed_;
 }
 
 void
 CAsteroidsShip::
 turnStop()
 {
-  if (! visible_) return;
+  if (! isVisible() || exploding_ > 0) return;
 
   da_ = 0.0;
 }
 
-void
+bool
 CAsteroidsShip::
 thrust()
 {
-  if (! visible_) return;
-
-  double t = thrust_;
+  if (! isVisible() || exploding_ > 0)
+    return false;
 
   double tx, ty;
 
-  matrix_.multiplyPoint(t, 0.0, &tx, &ty);
+  matrix_.multiplyPoint(thrust_, 0.0, &tx, &ty);
 
-  double dx1 = dx_ + tx;
-  double dy1 = dy_ + ty;
+#if 0
+  double dx1 = v_.x() + tx;
+  double dy1 = v_.y() + ty;
 
-  double d = fabs(dx_*dx_ + dy_*dy_);
+  double d = v_.lengthSqr();
 
-  if (d < thrustMax_) {
-    dx_ = dx1;
-    dy_ = dy1;
-  }
-}
+  if (d < thrustMax_)
+    v_ = CVector2D(dx1, dy1);
+#else
+  CVector2D a(tx, ty);
 
-bool
-CAsteroidsShip::
-fire()
-{
-  if (! visible_) return false;
+  double d = a.lengthSqr();
 
-  if (bullet_mgr_.getNumBullets() >= bulletNum_)
-    return false;
+  if (d < thrustMax_)
+    a_ = a;
+#endif
 
-  double x1r, y1r;
+  auto shape_mgr = CAsteroidsShapeMgrInst;
 
-  matrix_.multiplyPoint(0.5*size_, 0, &x1r, &y1r);
-
-  bullet_mgr_.addBullet(x_ + x1r, y_ + y1r, a_, bulletSize_, bulletSpeed_, bulletLife_);
+  setDrawCoords(shape_mgr->drawPoints(CAsteroidsShapeMgr::Type::SHIP_THRUST));
 
   return true;
 }
 
 void
 CAsteroidsShip::
+stopThrust()
+{
+  da_ = 0;
+
+  auto shape_mgr = CAsteroidsShapeMgrInst;
+
+  setDrawCoords(shape_mgr->drawPoints(CAsteroidsShapeMgr::Type::SHIP));
+}
+
+bool
+CAsteroidsShip::
+fire()
+{
+  if (! isVisible() || exploding_ > 0) return false;
+
+  if (bulletMgr_->getNumBullets() >= bulletNum_)
+    return false;
+
+  double x1r, y1r;
+
+  matrix_.multiplyPoint(0.5*size_, 0, &x1r, &y1r);
+
+  bulletMgr_->addBullet(CPoint2D(p_.x + x1r, p_.y + y1r), angle_,
+                        bulletSize_, bulletSpeed_, bulletLife_);
+
+  return true;
+}
+
+bool
+CAsteroidsShip::
 hyperspace()
 {
-  if (! visible_) return;
+  if (! isVisible() || exploding_ > 0)
+    return false;
 
-  x_ = CMathRand::randInRange(0.0, 1.0);
-  y_ = CMathRand::randInRange(0.0, 1.0);
+  resetPosition();
+
+  p_ = CPoint2D(CMathRand::randInRange(0.0, 1.0), CMathRand::randInRange(0.0, 1.0));
+
+  return true;
 }
 
 void
 CAsteroidsShip::
 move()
 {
+  if (! isVisible())
+    return;
+
+  assert(! app_.isGameOver());
+
+  if (exploding_ > 0) {
+    --exploding_;
+
+    if (exploding_ <= 0) {
+      init();
+
+      invunerable_ = 50;
+
+      CAsteroidsObject::move();
+    }
+
+    return;
+  }
+
+  if (invunerable_ > 0)
+    --invunerable_;
+
+  a_ *= 0.9;
+
   CAsteroidsObject::move();
 
-  bullet_mgr_.move();
+  bulletMgr_->move();
+}
+
+CRGBA
+CAsteroidsShip::
+color() const
+{
+  if (invunerable_ > 0) {
+    CRGBA c(0.5, 0.5, 0.5);
+
+    c.setAlpha((50.0 - invunerable_)/50.0);
+
+    return c;
+  }
+  else
+    return CAsteroidsObject::color();
 }
 
 void
 CAsteroidsShip::
 draw()
 {
-  if (! visible_) return;
+  if (! isVisible() || exploding_ > 0) return;
 
   CAsteroidsObject::draw();
 
-  bullet_mgr_.draw();
+  bulletMgr_->draw();
+}
+
+void
+CAsteroidsShip::
+hit()
+{
+  CAsteroidsObject::hit();
 }

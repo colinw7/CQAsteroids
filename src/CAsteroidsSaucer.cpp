@@ -1,133 +1,157 @@
-#include <CAsteroidsLibI.h>
-
-CPoint2D
-CAsteroidsSaucer::
-draw_coords1_[] = {
-  CPoint2D( 0.50,  0.00),
-  CPoint2D( 0.25,  0.25),
-  CPoint2D(-0.25,  0.25),
-  CPoint2D(-0.50,  0.00),
-  CPoint2D(-0.25, -0.25),
-  CPoint2D( 0.25, -0.25),
-};
-
-CPoint2D
-CAsteroidsSaucer::
-draw_coords2_[] = {
-  CPoint2D( 0.50,  0.00),
-  CPoint2D( 0.25,  0.25),
-  CPoint2D(-0.25,  0.25),
-  CPoint2D(-0.50,  0.00),
-  CPoint2D(-0.25, -0.25),
-  CPoint2D( 0.25, -0.25),
-};
-
-CPoint2D
-CAsteroidsSaucer::
-collision_coords_[] = {
-  CPoint2D( 0.5, -0.25),
-  CPoint2D( 0.5,  0.25),
-  CPoint2D(-0.5,  0.25),
-  CPoint2D(-0.5, -0.25),
-};
-
-int CAsteroidsSaucer::num_draw_coords1_ = sizeof(draw_coords1_)/sizeof(CPoint2D);
-int CAsteroidsSaucer::num_draw_coords2_ = sizeof(draw_coords2_)/sizeof(CPoint2D);
-
-int CAsteroidsSaucer::num_collision_coords_ = sizeof(collision_coords_)/sizeof(CPoint2D);
+#include <CAsteroidsSaucer.h>
+#include <CAsteroidsBigSaucer.h>
+#include <CAsteroidsSmallSaucer.h>
+#include <CAsteroidsBullet.h>
+#include <CAsteroidsRock.h>
+#include <CAsteroidsShip.h>
+#include <CAsteroidsExplosion.h>
+#include <CAsteroids.h>
+#include <CAsteroidsShapeMgr.h>
+#include <CMathRand.h>
 
 CAsteroidsSaucerMgr::
 CAsteroidsSaucerMgr(const CAsteroids &app) :
  app_(app)
 {
-  if (! app_.getConfigValue("BigSaucer", "score", big_saucer_score_))
-    big_saucer_score_ = 500;
-  if (! app_.getConfigValue("BigSaucer", "size", big_saucer_size_))
-    big_saucer_size_  = 0.03;
-  if (! app_.getConfigValue("BigSaucer", "bulletSize", big_saucer_bulletSize_))
-    big_saucer_bulletSize_ = 0.01;
-  if (! app_.getConfigValue("BigSaucer", "bulletSpeed", big_saucer_bulletSpeed_))
-    big_saucer_bulletSpeed_ = 0.01;
-  if (! app_.getConfigValue("BigSaucer", "bulletLife", big_saucer_bulletLife_))
-    big_saucer_bulletLife_ = 0.6;
-  if (! app_.getConfigValue("BigSaucer", "bulletNum", big_saucer_bulletNum_))
-    big_saucer_bulletNum_ = 4;
-  if (! app_.getConfigValue("BigSaucer", "delay", big_saucer_delay_))
-    big_saucer_delay_ = 100;
-  if (! app_.getConfigValue("BigSaucer", "fireInterval", big_saucer_fireInterval_))
-    big_saucer_fireInterval_ = 10;
+  (void) app_.getConfigValue("BigSaucer", "score"       , bigSaucerScore_);
+  (void) app_.getConfigValue("BigSaucer", "size"        , bigSaucerSize_);
+  (void) app_.getConfigValue("BigSaucer", "bulletSize"  , bigSaucerBulletSize_);
+  (void) app_.getConfigValue("BigSaucer", "bulletSpeed" , bigSaucerBulletSpeed_);
+  (void) app_.getConfigValue("BigSaucer", "bulletLife"  , bigSaucerBulletLife_);
+  (void) app_.getConfigValue("BigSaucer", "bulletNum"   , bigSaucerBulletNum_);
+  (void) app_.getConfigValue("BigSaucer", "delay"       , bigSaucerDelay_);
+  (void) app_.getConfigValue("BigSaucer", "fireInterval", bigSaucerFireInterval_);
 
-  if (! app_.getConfigValue("SmallSaucer", "score", small_saucer_score_))
-    small_saucer_score_ = 1000;
-  if (! app_.getConfigValue("SmallSaucer", "size", small_saucer_size_))
-    small_saucer_size_  = 0.015;
-  if (! app_.getConfigValue("SmallSaucer", "bulletSize", big_saucer_bulletSize_))
-    small_saucer_bulletSize_ = 0.01;
-  if (! app_.getConfigValue("SmallSaucer", "bulletSpeed", big_saucer_bulletSpeed_))
-    small_saucer_bulletSpeed_ = 0.01;
-  if (! app_.getConfigValue("SmallSaucer", "bulletLife", big_saucer_bulletLife_))
-    small_saucer_bulletLife_ = 0.6;
-  if (! app_.getConfigValue("SmallSaucer", "bulletNum", big_saucer_bulletNum_))
-    small_saucer_bulletNum_ = 4;
-  if (! app_.getConfigValue("SmallSaucer", "delay", small_saucer_delay_))
-    small_saucer_delay_ = 200;
-  if (! app_.getConfigValue("SmallSaucer", "fireInterval", small_saucer_fireInterval_))
-    small_saucer_fireInterval_ = 5;
+  (void) app_.getConfigValue("SmallSaucer", "score"       , smallSaucerScore_);
+  (void) app_.getConfigValue("SmallSaucer", "size"        , smallSaucerSize_);
+  (void) app_.getConfigValue("SmallSaucer", "bulletSize"  , smallSaucerBulletSize_);
+  (void) app_.getConfigValue("SmallSaucer", "bulletSpeed" , smallSaucerBulletSpeed_);
+  (void) app_.getConfigValue("SmallSaucer", "bulletLife"  , smallSaucerBulletLife_);
+  (void) app_.getConfigValue("SmallSaucer", "bulletNum"   , smallSaucerBulletNum_);
+  (void) app_.getConfigValue("SmallSaucer", "delay"       , smallSaucerDelay_);
+  (void) app_.getConfigValue("SmallSaucer", "fireInterval", smallSaucerFireInterval_);
+}
 
-  t_ = 0;
+CAsteroidsSaucerMgr::
+~CAsteroidsSaucerMgr()
+{
+  delete bigSaucer_;
+  delete smallSaucer_;
+}
+
+void
+CAsteroidsSaucerMgr::
+init()
+{
+  bigSaucer_   = app_.getObjectMgr()->createBigSaucer  ();
+  smallSaucer_ = app_.getObjectMgr()->createSmallSaucer();
+}
+
+CAsteroidsSaucer *
+CAsteroidsSaucerMgr::
+getVisibleSaucer() const
+{
+  if (bigSaucer_->isVisible())
+    return bigSaucer_;
+
+  if (smallSaucer_->isVisible())
+    return smallSaucer_;
+
+  return nullptr;
 }
 
 void
 CAsteroidsSaucerMgr::
 update()
 {
-  t_ += 1;
+  t1_ += 1;
 
-  if (t_ >= big_saucer_delay_) {
-    if (saucers_.empty())
-      app_.getObjectMgr()->createBigSaucer(0.0, 0.5, 0.004, 0.0);
+  if (bigSaucer_->isVisible() || smallSaucer_->isVisible())
+    return;
+
+  if (t1_ >= bigSaucerDelay_) {
+    t2_ += 1;
+
+    if (t2_ >= smallSaucerDelay_)
+      showSmallSaucer(CPoint2D(0.0, 0.75), CVector2D(0.006, 0.0));
+    else
+      showBigSaucer(CPoint2D(0.0, 0.75), CVector2D(0.004, 0.0));
   }
-
-  if (saucers_.empty())
-    restart();
-}
-
-CAsteroidsBigSaucer *
-CAsteroidsSaucerMgr::
-createBigSaucer(double x, double y, double dx, double dy)
-{
-  CAsteroidsBigSaucer *saucer = new CAsteroidsBigSaucer(app_, x, y, dx, dy);
-
-  saucers_.push_back(saucer);
-
-  return saucer;
 }
 
 void
 CAsteroidsSaucerMgr::
-removeSaucer(CAsteroidsSaucer *saucer)
+showBigSaucer(const CPoint2D &p, const CVector2D &v)
 {
-  saucers_.remove(saucer);
-
-  delete saucer;
+  bigSaucer_->setVisible (true);
+  bigSaucer_->setPos     (p);
+  bigSaucer_->setVelocity(v);
 }
 
 void
 CAsteroidsSaucerMgr::
-restart()
+showSmallSaucer(const CPoint2D &p, const CVector2D &v)
 {
-  t_ = 0;
+  smallSaucer_->setVisible (true);
+  smallSaucer_->setPos     (p);
+  smallSaucer_->setVelocity(v);
+}
+
+void
+CAsteroidsSaucerMgr::
+reset()
+{
+  bigSaucer_->setVisible(false);
+  bigSaucer_->reset();
+
+  smallSaucer_->setVisible(false);
+  smallSaucer_->reset();
+
+  t1_ = 0;
+  t2_ = 0;
+}
+
+void
+CAsteroidsSaucerMgr::
+restart(CAsteroidsSaucerType type)
+{
+  if      (type == CAsteroidsSaucerType::BIG) {
+    t1_ = 0;
+  }
+  else if (type == CAsteroidsSaucerType::SMALL) {
+    t1_ = 0;
+    t2_ = 0;
+  }
+}
+
+std::string
+CAsteroidsSaucerMgr::
+statusStr() const
+{
+  std::string str = "SaucerMgr:";
+
+  str += " " + std::to_string(t1_) + "," + std::to_string(t2_);
+
+  if (bigSaucer_->isVisible())
+    str += " Big";
+
+  if (smallSaucer_->isVisible())
+    str += " Small";
+
+  return str;
 }
 
 //------
 
 CAsteroidsSaucer::
-CAsteroidsSaucer(const CAsteroids &app, double x, double y,
-                 double dx, double dy, CAsteroidsSaucerType type) :
- CAsteroidsObject(app, x, y, 0.0, dx, dy, 0.0, 0.1, 0, false),
- bullet_mgr_(app), type_(type)
+CAsteroidsSaucer(const CAsteroids &app, CAsteroidsSaucerType type) :
+ CAsteroidsObject(app, CAsteroidsObject::Type::SAUCER, CPoint2D(0.0, 0.0), 0.0,
+                  CVector2D(0.0, 0.0), 0.0, 0.1, 0, false),
+ type_(type)
 {
-  if      (type_ == CASTEROIDS_BIG_SAUCER) {
+  bulletMgr_ = new CAsteroidsBulletMgr(app, this);
+
+  if      (type_ == CAsteroidsSaucerType::BIG) {
     size_         = app_.getSaucerMgr()->getBigSaucerSize        ();
     score_        = app_.getSaucerMgr()->getBigSaucerScore       ();
     bulletSize_   = app_.getSaucerMgr()->getBigSaucerBulletSize  ();
@@ -136,7 +160,7 @@ CAsteroidsSaucer(const CAsteroids &app, double x, double y,
     bulletNum_    = app_.getSaucerMgr()->getBigSaucerBulletNum   ();
     fireInterval_ = app_.getSaucerMgr()->getBigSaucerFireInterval();
   }
-  else if (type_ == CASTEROIDS_SMALL_SAUCER) {
+  else if (type_ == CAsteroidsSaucerType::SMALL) {
     size_         = app_.getSaucerMgr()->getSmallSaucerSize        ();
     score_        = app_.getSaucerMgr()->getSmallSaucerScore       ();
     bulletSize_   = app_.getSaucerMgr()->getSmallSaucerBulletSize  ();
@@ -148,70 +172,107 @@ CAsteroidsSaucer(const CAsteroids &app, double x, double y,
 
   t_ = 0;
 
-  if (type_ == CASTEROIDS_BIG_SAUCER)
-    setDrawCoords(draw_coords1_, num_draw_coords1_);
-  else
-    setDrawCoords(draw_coords2_, num_draw_coords2_);
+  //---
 
-  setCollisionCoords(collision_coords_, num_collision_coords_);
+  color_ = CRGBA(0.9, 0.0, 0.0);
+
+  auto shape_mgr = CAsteroidsShapeMgrInst;
+
+  if (type_ == CAsteroidsSaucerType::BIG) {
+    setDrawCoords     (shape_mgr->drawPoints     (CAsteroidsShapeMgr::Type::BIG_SAUCER));
+    setCollisionCoords(shape_mgr->collisionPoints(CAsteroidsShapeMgr::Type::BIG_SAUCER));
+  }
+  else {
+    setDrawCoords     (shape_mgr->drawPoints     (CAsteroidsShapeMgr::Type::SMALL_SAUCER));
+    setCollisionCoords(shape_mgr->collisionPoints(CAsteroidsShapeMgr::Type::SMALL_SAUCER));
+  }
 }
 
 CAsteroidsSaucer::
 ~CAsteroidsSaucer()
 {
+  delete bulletMgr_;
+}
+
+void
+CAsteroidsSaucer::
+reset()
+{
+  bulletMgr_->reset();
 }
 
 void
 CAsteroidsSaucer::
 move()
 {
-  CAsteroidsObject::move();
+  if (visible_)
+    CAsteroidsObject::move();
 
-  bullet_mgr_.move();
+  bulletMgr_->move();
 }
 
 void
 CAsteroidsSaucer::
 intersect()
 {
-  intersectRocks();
+  if (visible_)
+    intersectRocks();
 
-  bullet_mgr_.intersect();
+  bulletMgr_->intersect();
 }
 
 void
 CAsteroidsSaucer::
 draw()
 {
-  ++t_;
+  if (visible_) {
+    CAsteroidsObject::draw();
 
-  if ((t_ % fireInterval_) == 0) {
-    if (bullet_mgr_.getNumBullets() >= bulletNum_)
-      return;
+    ++t_;
 
-    double x1r, y1r;
+    if ((t_ % fireInterval_) == 0) {
+      if (bulletMgr_->getNumBullets() >= bulletNum_)
+        return;
 
-    matrix_.multiplyPoint(0.5*size_, 0, &x1r, &y1r);
+      double x1r, y1r;
 
-    bullet_mgr_.addBullet(x_ + x1r, y_ + y1r, a_, bulletSize_, bulletSpeed_, bulletLife_);
+      matrix_.multiplyPoint(0.5*size_, 0, &x1r, &y1r);
+
+      CPoint2D bulletPos(p_.x + x1r, p_.y + y1r);
+
+      const CPoint2D &shipPos = app_.getShip()->pos();
+
+      CAsteroidsBullet *bullet =
+        bulletMgr_->addBullet(bulletPos, 0.0, bulletSize_, bulletSpeed_, bulletLife_);
+
+      double a = atan2(shipPos.y - bulletPos.y, shipPos.x - bulletPos.x)/(2*M_PI);
+
+      a += CMathRand::randInRange(-0.1, 0.1);
+
+      bullet->setDirection(a);
+
+      if (type_ == CAsteroidsSaucerType::SMALL)
+        bullet->setTarget(app_.getShip());
+
+      app_.playSound("saucer.fire");
+    }
   }
 
-  bullet_mgr_.draw();
+  bulletMgr_->draw();
 }
 
 void
 CAsteroidsSaucer::
 intersectRocks()
 {
-  auto rocks = app_.getRockMgr()->getRocks();
+  assert(visible_);
 
-  auto prock1 = rocks.begin();
-  auto prock2 = rocks.end  ();;
+  for (const auto &rock : app_.getRockMgr()->getRocks()) {
+    if (rock->intersectObj(this)) {
+      rock->hit();
 
-  for ( ; prock1 != prock2; ++prock1) {
-    if ((*prock1)->pointInside(x_, y_)) {
-      (*prock1)->hit();
-      remove_ = true;
+      destroy();
+
       break;
     }
   }
@@ -219,7 +280,35 @@ intersectRocks()
 
 void
 CAsteroidsSaucer::
+remove()
+{
+  destroy();
+}
+
+void
+CAsteroidsSaucer::
 destroy()
 {
-  app_.getSaucerMgr()->removeSaucer(this);
+  if (! visible_)
+    return;
+
+  app_.getExplosionMgr()->addExplosion(this, p_);
+
+  auto mgr = app_.getSaucerMgr();
+
+  mgr->restart(type_);
+
+  visible_ = false;
+}
+
+void
+CAsteroidsSaucer::
+hit()
+{
+  if (! visible_)
+    return;
+
+  app_.playSound("saucer.hit");
+
+  CAsteroidsObject::hit();
 }

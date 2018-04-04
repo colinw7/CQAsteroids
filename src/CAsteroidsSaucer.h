@@ -1,126 +1,124 @@
-enum CAsteroidsSaucerType {
-  CASTEROIDS_BIG_SAUCER,
-  CASTEROIDS_SMALL_SAUCER
+#ifndef CAsteroidsSaucer_H
+#define CAsteroidsSaucer_H
+
+#include <CAsteroidsObject.h>
+
+enum class CAsteroidsSaucerType {
+  NONE,
+  BIG,
+  SMALL
 };
 
+class CAsteroids;
+class CAsteroidsSaucer;
 class CAsteroidsBigSaucer;
+class CAsteroidsSmallSaucer;
+class CAsteroidsBulletMgr;
 
 class CAsteroidsSaucerMgr {
  public:
+  using Saucers = std::list<CAsteroidsSaucer*>;
+
+ public:
   CAsteroidsSaucerMgr(const CAsteroids &app);
+ ~CAsteroidsSaucerMgr();
 
-  CAsteroidsBigSaucer *createBigSaucer(double x, double y, double dx, double dy);
+  void init();
 
-  std::list<CAsteroidsSaucer *> getSaucers() const { return saucers_; }
+  void showBigSaucer  (const CPoint2D &p, const CVector2D &v);
+  void showSmallSaucer(const CPoint2D &p, const CVector2D &v);
 
-  double getBigSaucerSize        () const {
-    return big_saucer_size_        ;
-  }
-  int    getBigSaucerScore       () const {
-    return big_saucer_score_       ;
-  }
-  double getBigSaucerBulletSize  () const {
-    return big_saucer_bulletSize_  ;
-  }
-  double getBigSaucerBulletSpeed () const {
-    return big_saucer_bulletSpeed_ ;
-  }
-  double getBigSaucerBulletLife  () const {
-    return big_saucer_bulletLife_  ;
-  }
-  int    getBigSaucerBulletNum   () const {
-    return big_saucer_bulletNum_   ;
-  }
-  int    getBigSaucerFireInterval() const {
-    return big_saucer_fireInterval_;
-  }
+  double getBigSaucerSize        () const { return bigSaucerSize_        ; }
+  int    getBigSaucerScore       () const { return bigSaucerScore_       ; }
+  double getBigSaucerBulletSize  () const { return bigSaucerBulletSize_  ; }
+  double getBigSaucerBulletSpeed () const { return bigSaucerBulletSpeed_ ; }
+  double getBigSaucerBulletLife  () const { return bigSaucerBulletLife_  ; }
+  int    getBigSaucerBulletNum   () const { return bigSaucerBulletNum_   ; }
+  int    getBigSaucerFireInterval() const { return bigSaucerFireInterval_; }
 
-  double getSmallSaucerSize        () const {
-    return small_saucer_size_       ;
-  }
-  int    getSmallSaucerScore       () const {
-    return small_saucer_score_      ;
-  }
-  double getSmallSaucerBulletSize  () const {
-    return small_saucer_bulletSize_ ;
-  }
-  double getSmallSaucerBulletSpeed () const {
-    return small_saucer_bulletSpeed_;
-  }
-  double getSmallSaucerBulletLife  () const {
-    return small_saucer_bulletLife_ ;
-  }
-  int    getSmallSaucerBulletNum   () const {
-    return small_saucer_bulletNum_  ;
-  }
-  int    getSmallSaucerFireInterval() const {
-    return small_saucer_fireInterval_;
-  }
+  double getSmallSaucerSize        () const { return smallSaucerSize_       ; }
+  int    getSmallSaucerScore       () const { return smallSaucerScore_      ; }
+  double getSmallSaucerBulletSize  () const { return smallSaucerBulletSize_ ; }
+  double getSmallSaucerBulletSpeed () const { return smallSaucerBulletSpeed_; }
+  double getSmallSaucerBulletLife  () const { return smallSaucerBulletLife_ ; }
+  int    getSmallSaucerBulletNum   () const { return smallSaucerBulletNum_  ; }
+  int    getSmallSaucerFireInterval() const { return smallSaucerFireInterval_; }
 
   void update();
 
-  void addSaucer   (CAsteroidsSaucer *saucer);
-  void removeSaucer(CAsteroidsSaucer *saucer);
+  void reset();
 
-  void restart();
+  void restart(CAsteroidsSaucerType type=CAsteroidsSaucerType::SMALL);
+
+  CAsteroidsSaucer *getVisibleSaucer() const;
+
+  std::string statusStr() const;
 
  private:
-  const CAsteroids&            app_;
-  int                          t_;
-  std::list<CAsteroidsSaucer*> saucers_;
+  const CAsteroids& app_;
 
-  int    big_saucer_score_;
-  double big_saucer_size_;
-  double big_saucer_bulletSize_;
-  double big_saucer_bulletSpeed_;
-  double big_saucer_bulletLife_;
-  int    big_saucer_bulletNum_;
-  int    big_saucer_delay_;
-  int    big_saucer_fireInterval_;
+  int t1_ { 0 };
+  int t2_ { 0 };
 
-  int    small_saucer_score_;
-  double small_saucer_size_;
-  double small_saucer_bulletSize_;
-  double small_saucer_bulletSpeed_;
-  double small_saucer_bulletLife_;
-  int    small_saucer_bulletNum_;
-  int    small_saucer_delay_;
-  int    small_saucer_fireInterval_;
+  CAsteroidsBigSaucer   *bigSaucer_;
+  CAsteroidsSmallSaucer *smallSaucer_;
+
+  int    bigSaucerScore_        = 500;
+  double bigSaucerSize_         = 0.03;
+  double bigSaucerBulletSize_   = 0.01;
+  double bigSaucerBulletSpeed_  = 0.01;
+  double bigSaucerBulletLife_   = 0.6;
+  int    bigSaucerBulletNum_    = 4;
+  int    bigSaucerDelay_        = 250;
+  int    bigSaucerFireInterval_ = 10;
+
+  int    smallSaucerScore_        = 1000;
+  double smallSaucerSize_         = 0.015;
+  double smallSaucerBulletSize_   = 0.01;
+  double smallSaucerBulletSpeed_  = 0.01;
+  double smallSaucerBulletLife_   = 0.6;
+  int    smallSaucerBulletNum_    = 4;
+  int    smallSaucerDelay_        = 3;
+  int    smallSaucerFireInterval_ = 5;
 };
 
 //---
 
 class CAsteroidsSaucer : public CAsteroidsObject {
  public:
-  CAsteroidsSaucer(const CAsteroids &app, double x, double y,
-                   double dx, double dy, CAsteroidsSaucerType type);
+  CAsteroidsSaucer(const CAsteroids &app, CAsteroidsSaucerType type);
 
   virtual ~CAsteroidsSaucer();
 
-  void move();
+  bool isVisible() const { return visible_; }
+  void setVisible(bool b) { visible_ = b; }
 
-  void intersect();
+  void reset();
+
+  void move() override;
+
+  void intersect() override;
+
   void intersectRocks();
 
-  void draw();
+  void draw() override;
 
-  void destroy();
+  void destroy() override;
+
+  void hit() override;
+
+  void remove() override;
 
  private:
-  static CPoint2D draw_coords1_[];
-  static int      num_draw_coords1_;
-  static CPoint2D draw_coords2_[];
-  static int      num_draw_coords2_;
-
-  static CPoint2D collision_coords_[];
-  static int      num_collision_coords_;
-
-  CAsteroidsBulletMgr  bullet_mgr_;
-  CAsteroidsSaucerType type_;
-  double               bulletSize_;
-  double               bulletSpeed_;
-  double               bulletLife_;
-  int                  bulletNum_;
-  int                  fireInterval_;
-  int                  t_;
+  CAsteroidsBulletMgr* bulletMgr_    { nullptr };
+  CAsteroidsSaucerType type_         { CAsteroidsSaucerType::NONE };
+  double               bulletSize_   { 0.01 };
+  double               bulletSpeed_  { 0.01 };
+  double               bulletLife_   { 0.6 };
+  int                  bulletNum_    { 4 };
+  int                  fireInterval_ { 5 };
+  int                  t_            { 0 };
+  bool                 visible_      { false };
 };
+
+#endif

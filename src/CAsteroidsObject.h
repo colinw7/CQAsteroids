@@ -1,8 +1,19 @@
 #ifndef CAsteroidsObject_H
 #define CAsteroidsObject_H
 
+#include <CBBox2D.h>
+#include <CMatrix2D.h>
+#include <CVector2D.h>
+#include <CPoint2D.h>
+#include <CRGBA.h>
+#include <list>
+#include <vector>
+
+class CAsteroids;
+class CAsteroidsObject;
 class CAsteroidsShip;
 class CAsteroidsBigSaucer;
+class CAsteroidsSmallSaucer;
 class CAsteroidsBigRock;
 class CAsteroidsMediumRock;
 class CAsteroidsSmallRock;
@@ -14,55 +25,85 @@ class CAsteroidsObjectMgr {
 
   CAsteroidsShip *createShip();
 
-  CAsteroidsBigSaucer *createBigSaucer(double x, double y, double dx, double dy);
+  CAsteroidsBigSaucer   *createBigSaucer  ();
+  CAsteroidsSmallSaucer *createSmallSaucer();
 
-  CAsteroidsBigRock    *createBigRock(double x, double y, double a,
-                                      double dx, double dy, double da);
-  CAsteroidsMediumRock *createMediumRock(double x, double y, double a,
-                                         double dx, double dy, double da);
-  CAsteroidsSmallRock  *createSmallRock(double x, double y, double a,
-                                        double dx, double dy, double da);
+  CAsteroidsBigRock    *createBigRock(const CPoint2D &p, double a,
+                                      const CVector2D &v, double da);
+  CAsteroidsMediumRock *createMediumRock(const CPoint2D &p, double a,
+                                         const CVector2D &v, double da);
+  CAsteroidsSmallRock  *createSmallRock(const CPoint2D &p, double a,
+                                        const CVector2D &v, double da);
 
   void move();
+
   void intersect();
+
   void draw();
 
  private:
-  void addObject(CAsteroidsObject *object);
+  void addObject   (CAsteroidsObject *object);
   void removeObject(CAsteroidsObject *object);
 
  protected:
-  const CAsteroids &app_;
+  using Objects = std::list<CAsteroidsObject *>;
 
-  std::list<CAsteroidsObject *> objects_;
+  const CAsteroids& app_;
+  Objects           objects_;
 };
 
 //------
 
 class CAsteroidsObject {
  public:
-  CAsteroidsObject(const CAsteroids &app, double x, double y, double a,
-                   double dx, double dy, double da,
-                   double size, int score, bool wrap_on_edge);
+  enum class Type {
+    NONE,
+    SHIP,
+    ROCK,
+    BULLET,
+    SAUCER,
+    EXPLOSION
+  };
+
+  using Points = std::vector<CPoint2D>;
+
+ public:
+  CAsteroidsObject(const CAsteroids &app, Type type, const CPoint2D &pos, double a,
+                   const CVector2D &v, double da, double size, int score,
+                   bool wrap_on_edge);
 
   virtual ~CAsteroidsObject();
 
+  const Type &type() const { return type_; }
+
+  const CPoint2D &pos() const { return p_; }
+  void setPos(const CPoint2D &p) { p_ = p; }
+
+  const CVector2D &velocity() const { return v_; }
+  void setVelocity(const CVector2D &v) { v_ = v; }
+
+  bool isRemove() const { return remove_; }
   void setRemove() { remove_ = true; }
 
-  bool getRemove() const { return remove_; }
+  void setDrawCoords(const Points &draw_coords);
 
-  void setDrawCoords(CPoint2D *draw_coords, unsigned int num_draw_coords);
-  void setCollisionCoords(CPoint2D *coll_coords, unsigned int num_coll_coords);
+  void setCollisionCoords(const Points &coll_coords);
+
+  virtual CRGBA color() const { return color_; }
 
   virtual void move();
 
   virtual void intersect() { }
 
-  bool pointInside(double x, double y);
+  bool pointInside(const CPoint2D &p) const;
+
+  bool intersectObj(const CAsteroidsObject *obj) const;
 
   virtual void draw();
 
   virtual void hit();
+
+  virtual void remove();
 
   virtual void destroy();
 
@@ -71,29 +112,33 @@ class CAsteroidsObject {
   void updateCollisionCoords();
 
  protected:
-  const CAsteroids&     app_;
-  double                x_;
-  double                y_;
-  double                a_;
-  double                dx_;
-  double                dy_;
-  double                da_;
-  double                size_;
-  int                   score_;
-  bool                  wrap_on_edge_;
+  const CAsteroids& app_;
+  Type              type_;
 
-  CMatrix2D             matrix_;
-  bool                  remove_;
+  CPoint2D          p_ { 0.0, 0.0 }; // current position
+  CVector2D         v_ { 0.0, 0.0 }; // velocity
+  CVector2D         a_ { 0.0, 0.0 }; // acceleration
 
-  std::vector<CPoint2D> draw_coords_;
-  std::vector<CPoint2D> draw_coords1_;
-  int                   num_draw_coords_;
+  double            angle_ { 0 }; // current angle
+  double            da_    { 0 }; // delta angle
 
-  std::vector<CPoint2D> coll_coords_;
-  std::vector<CPoint2D> coll_coords1_;
-  int                   num_coll_coords_;
+  double            size_  { 0 };
+  int               score_ { 0 };
 
-  CBBox2D               bbox_;
+  bool              wrap_on_edge_ { false };
+
+  CMatrix2D         matrix_;
+  bool              remove_ { false };
+
+  Points            draw_coords_;
+  Points            draw_coords1_;
+
+  Points            coll_coords_;
+  Points            coll_coords1_;
+
+  CBBox2D           bbox_;
+
+  CRGBA             color_ { 1, 1, 1 };
 };
 
 #endif

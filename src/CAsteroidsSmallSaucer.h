@@ -1,4 +1,11 @@
+#ifndef CAsteroidsSmallSaucer_H
+#define CAsteroidsSmallSaucer_H
+
+#include <CAsteroidsSaucer.h>
+
 class CAsteroidsSmallSaucer : public CAsteroidsSaucer {
  public:
-  CAsteroidsSmallSaucer(const CAsteroids &app, double x, double y, double dx, double dy);
+  CAsteroidsSmallSaucer(const CAsteroids &app);
 };
+
+#endif

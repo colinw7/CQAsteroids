@@ -1,9 +1,9 @@
 #include <CQAsteroids.h>
+#include <CAsteroids.h>
 
 #include <CQUtil.h>
 #include <CQCanvas2D.h>
 #include <CQSound.h>
-#include <CAsteroidsLib.h>
 #include <CDisplayRange2D.h>
 
 #include <QApplication>
@@ -14,25 +14,33 @@
 
 class Canvas : public CQCanvas2D {
  public:
-  Canvas(CQAsteroids *asteroids);
+  Canvas(CQAsteroidsApp *asteroids);
 
   void keyPressEvent(QKeyEvent *e);
 
+  void keyReleaseEvent(QKeyEvent *e);
+
  private:
-  CQAsteroids *asteroids_;
+  CQAsteroidsApp *asteroids_;
 };
 
 //------
+
+#include <CAsteroidsRenderer.h>
 
 class CQAsteroidsRenderer : public CAsteroidsRenderer {
  public:
   CQAsteroidsRenderer(Canvas *canvas);
 
-  void clear(const CRGBA &bg);
+  void clear(const CRGBA &bg) override;
 
-  void setForeground(const CRGBA &rgba);
+  void setForeground(const CRGBA &rgba) override;
 
-  void drawLine(const CPoint2D &p1, const CPoint2D &p2);
+  void drawLine(const CPoint2D &p1, const CPoint2D &p2) override;
+
+  void drawPolygon(const Points &points) override;
+
+  void fillPolygon(const Points &points) override;
 
  private:
   Canvas *canvas_;
@@ -40,10 +48,30 @@ class CQAsteroidsRenderer : public CAsteroidsRenderer {
 
 //------
 
-CQAsteroids::
-CQAsteroids() :
+class CQAsteroids : public CAsteroids {
+ public:
+  CQAsteroids(CQAsteroidsApp *app, CAsteroidsRenderer *renderer) :
+   CAsteroids(renderer), app_(app) {
+  }
+
+  virtual ~CQAsteroids() { }
+
+  void playSound(const std::string &name) const override {
+    app_->playSound(name);
+  };
+
+ private:
+  CQAsteroidsApp *app_ { nullptr };
+};
+
+//------
+
+CQAsteroidsApp::
+CQAsteroidsApp() :
  QWidget()
 {
+  setObjectName("asteroidsApp");
+
   QVBoxLayout *layout = new QVBoxLayout(this);
   layout->setMargin(0); layout->setSpacing(0);
 
@@ -53,12 +81,14 @@ CQAsteroids() :
 
   renderer_ = new CQAsteroidsRenderer(canvas_);
 
-  asteroids_ = new CAsteroids(renderer_);
+  asteroids_ = new CQAsteroids(this, renderer_);
 
   //CQSoundMgrInst->setActive(false);
 
-  fire_sound_   = CQSoundMgrInst->addSound("sounds/shoot.wav");
-  thrust_sound_ = CQSoundMgrInst->addSound("sounds/thrust.wav");
+  fire_sound_    = CQSoundMgrInst->addSound("sounds/shoot.wav");
+  thrust_sound_  = CQSoundMgrInst->addSound("sounds/thrust.wav");
+  explode_sound_ = CQSoundMgrInst->addSound("sounds/explosion.wav");
+  hyper_sound_   = CQSoundMgrInst->addSound("sounds/hyperspace.wav");
 
   timer_ = new QTimer(this);
 
@@ -67,15 +97,47 @@ CQAsteroids() :
   timer_->start(50);
 }
 
-CQAsteroids::
-~CQAsteroids()
+CQAsteroidsApp::
+~CQAsteroidsApp()
 {
   delete renderer_;
   delete asteroids_;
 }
 
+bool
+CQAsteroidsApp::
+isFilled() const
+{
+  return asteroids_->isFilled();
+}
+
 void
-CQAsteroids::
+CQAsteroidsApp::
+setFilled(bool b)
+{
+  asteroids_->setFilled(b);
+
+  update();
+}
+
+bool
+CQAsteroidsApp::
+isColored() const
+{
+  return asteroids_->isColored();
+}
+
+void
+CQAsteroidsApp::
+setColored(bool b)
+{
+  asteroids_->setColored(b);
+
+  update();
+}
+
+void
+CQAsteroidsApp::
 update()
 {
   asteroids_->update();
@@ -84,69 +146,110 @@ update()
 }
 
 void
-CQAsteroids::
+CQAsteroidsApp::
 newGame()
 {
   asteroids_->newGame();
 }
 
 void
-CQAsteroids::
+CQAsteroidsApp::
+togglePause()
+{
+  asteroids_->togglePause();
+}
+
+void
+CQAsteroidsApp::
 shipTurnLeft()
 {
   asteroids_->shipTurnLeft();
 }
 
 void
-CQAsteroids::
+CQAsteroidsApp::
 shipTurnRight()
 {
   asteroids_->shipTurnRight();
 }
 
 void
-CQAsteroids::
+CQAsteroidsApp::
+shipTurnStop()
+{
+  asteroids_->shipTurnStop();
+}
+
+void
+CQAsteroidsApp::
 shipThrust()
 {
-  CQSoundMgrInst->playSound(thrust_sound_);
-
   asteroids_->shipThrust();
 }
 
 void
-CQAsteroids::
-shipFire()
+CQAsteroidsApp::
+shipStopThrust()
 {
-  if (asteroids_->shipFire())
-    CQSoundMgrInst->playSound(fire_sound_);
+  asteroids_->shipStopThrust();
 }
 
 void
-CQAsteroids::
+CQAsteroidsApp::
+shipFire()
+{
+  asteroids_->shipFire();
+}
+
+void
+CQAsteroidsApp::
 shipHyperspace()
 {
   asteroids_->shipHyperspace();
 }
 
+void
+CQAsteroidsApp::
+playSound(const std::string &name)
+{
+  if      (name == "ship.hit")
+    CQSoundMgrInst->playSound(explode_sound_);
+  else if (name == "ship.fire")
+    CQSoundMgrInst->playSound(fire_sound_);
+  else if (name == "ship.thrust")
+    CQSoundMgrInst->playSound(thrust_sound_);
+  else if (name == "ship.hyperspace")
+    CQSoundMgrInst->playSound(hyper_sound_);
+  else if (name == "saucer.fire")
+    CQSoundMgrInst->playSound(fire_sound_);
+  else if (name == "saucer.hit")
+    CQSoundMgrInst->playSound(explode_sound_);
+  else if (name == "rock.hit")
+    CQSoundMgrInst->playSound(explode_sound_);
+}
+
 //-------
 
 Canvas::
-Canvas(CQAsteroids *asteroids) :
- CQCanvas2D(NULL), asteroids_(asteroids)
+Canvas(CQAsteroidsApp *asteroids) :
+ asteroids_(asteroids)
 {
-  setDisplayRange(0, 1, 1, 0);
+  setDisplayRange(0, 0, 1, 1);
 }
 
 void
 Canvas::
 keyPressEvent(QKeyEvent *e)
 {
+  if (e->isAutoRepeat())
+    return;
+
   int key = e->key();
 
   if      (key == Qt::Key_Z)
-    asteroids_->shipTurnRight();
-  else if (key == Qt::Key_X)
     asteroids_->shipTurnLeft();
+  else if (key == Qt::Key_X)
+    asteroids_->shipTurnRight();
   else if (key == Qt::Key_Period)
     asteroids_->shipThrust();
   else if (key == Qt::Key_Slash)
@@ -155,6 +258,32 @@ keyPressEvent(QKeyEvent *e)
     asteroids_->shipHyperspace();
   else if (key == Qt::Key_Escape)
     asteroids_->newGame();
+  else if (key == Qt::Key_P)
+    asteroids_->togglePause();
+  else if (key == Qt::Key_E) {
+    QPointF pos = mapFromGlobal(QCursor::pos());
+
+    CPoint2D p(pos.x()/width(), (1.0 - pos.y()/height()));
+
+    asteroids_->asteroids()->explode(p);
+  }
+}
+
+void
+Canvas::
+keyReleaseEvent(QKeyEvent *e)
+{
+  if (e->isAutoRepeat())
+    return;
+
+  int key = e->key();
+
+  if      (key == Qt::Key_Z)
+    asteroids_->shipTurnStop();
+  else if (key == Qt::Key_X)
+    asteroids_->shipTurnStop();
+  else if (key == Qt::Key_Period)
+    asteroids_->shipStopThrust();
 }
 
 //-------
@@ -183,14 +312,18 @@ void
 CQAsteroidsRenderer::
 setForeground(const CRGBA &rgba)
 {
-  QPen pen(CQUtil::rgbaToColor(rgba));
-
   QPainter *painter = canvas_->getPainter();
   if (! painter) return;
 
+  QColor c = CQUtil::rgbaToColor(rgba);
+
+  QPen   pen  (c);
+  QBrush brush(c);
+
   pen.setWidth(0);
 
-  painter->setPen(pen);
+  painter->setPen  (pen);
+  painter->setBrush(brush);
 }
 
 void
@@ -201,4 +334,46 @@ drawLine(const CPoint2D &p1, const CPoint2D &p2)
   if (! painter) return;
 
   painter->drawLine(CQUtil::toQPoint(p1), CQUtil::toQPoint(p2));
+}
+
+void
+CQAsteroidsRenderer::
+drawPolygon(const Points &points)
+{
+  QPainter *painter = canvas_->getPainter();
+  if (! painter) return;
+
+  assert(points.size());
+
+  QPainterPath path;
+
+  path.moveTo(CQUtil::toQPoint(points[0]));
+
+  for (std::size_t i = 1; i < points.size(); ++i)
+    path.lineTo(CQUtil::toQPoint(points[i]));
+
+  path.closeSubpath();
+
+  painter->strokePath(path, painter->pen());
+}
+
+void
+CQAsteroidsRenderer::
+fillPolygon(const Points &points)
+{
+  QPainter *painter = canvas_->getPainter();
+  if (! painter) return;
+
+  assert(points.size());
+
+  QPainterPath path;
+
+  path.moveTo(CQUtil::toQPoint(points[0]));
+
+  for (std::size_t i = 1; i < points.size(); ++i)
+    path.lineTo(CQUtil::toQPoint(points[i]));
+
+  path.closeSubpath();
+
+  painter->fillPath(path, painter->brush());
 }

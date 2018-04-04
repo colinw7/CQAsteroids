@@ -1,5 +1,13 @@
-#include <CAsteroidsLibI.h>
-#include <CFuncs.h>
+#include <CAsteroidsObject.h>
+#include <CAsteroidsBigRock.h>
+#include <CAsteroidsMediumRock.h>
+#include <CAsteroidsSmallRock.h>
+#include <CAsteroidsBigSaucer.h>
+#include <CAsteroidsSmallSaucer.h>
+#include <CAsteroidsShip.h>
+#include <CAsteroids.h>
+#include <CAsteroidsShapeMgr.h>
+#include <CMathGeom2D.h>
 
 CAsteroidsObjectMgr::
 CAsteroidsObjectMgr(const CAsteroids &app) :
@@ -10,8 +18,8 @@ CAsteroidsObjectMgr(const CAsteroids &app) :
 CAsteroidsObjectMgr::
 ~CAsteroidsObjectMgr()
 {
-  for (auto p1 = objects_.begin(), p2 = objects_.end(); p1 != p2; ++p1)
-    (*p1)->destroy();
+  for (auto &object : objects_)
+    object->destroy();
 
   objects_.clear();
 }
@@ -20,7 +28,7 @@ CAsteroidsShip *
 CAsteroidsObjectMgr::
 createShip()
 {
-  CAsteroidsShip *ship = new CAsteroidsShip(app_);
+  auto ship = new CAsteroidsShip(app_);
 
   addObject(ship);
 
@@ -29,9 +37,9 @@ createShip()
 
 CAsteroidsBigRock *
 CAsteroidsObjectMgr::
-createBigRock(double x, double y, double a, double dx, double dy, double da)
+createBigRock(const CPoint2D &p, double a, const CVector2D &v, double da)
 {
-  CAsteroidsBigRock *rock = app_.getRockMgr()->createBigRock(x, y, a, dx,  dy, da);
+  auto rock = app_.getRockMgr()->createBigRock(p, a, v, da);
 
   addObject(rock);
 
@@ -40,9 +48,9 @@ createBigRock(double x, double y, double a, double dx, double dy, double da)
 
 CAsteroidsMediumRock *
 CAsteroidsObjectMgr::
-createMediumRock(double x, double y, double a, double dx, double dy, double da)
+createMediumRock(const CPoint2D &p, double a, const CVector2D &v, double da)
 {
-  CAsteroidsMediumRock *rock = app_.getRockMgr()->createMediumRock(x, y, a, dx,  dy, da);
+  auto rock = app_.getRockMgr()->createMediumRock(p, a, v, da);
 
   addObject(rock);
 
@@ -51,9 +59,9 @@ createMediumRock(double x, double y, double a, double dx, double dy, double da)
 
 CAsteroidsSmallRock *
 CAsteroidsObjectMgr::
-createSmallRock(double x, double y, double a, double dx, double dy, double da)
+createSmallRock(const CPoint2D &p, double a, const CVector2D &v, double da)
 {
-  CAsteroidsSmallRock *rock = app_.getRockMgr()->createSmallRock(x, y, a, dx,  dy, da);
+  auto rock = app_.getRockMgr()->createSmallRock(p, a, v, da);
 
   addObject(rock);
 
@@ -62,9 +70,20 @@ createSmallRock(double x, double y, double a, double dx, double dy, double da)
 
 CAsteroidsBigSaucer *
 CAsteroidsObjectMgr::
-createBigSaucer(double x, double y, double dx, double dy)
+createBigSaucer()
 {
-  CAsteroidsBigSaucer *saucer = app_.getSaucerMgr()->createBigSaucer(x, y, dx, dy);
+  auto saucer = new CAsteroidsBigSaucer(app_);
+
+  addObject(saucer);
+
+  return saucer;
+}
+
+CAsteroidsSmallSaucer *
+CAsteroidsObjectMgr::
+createSmallSaucer()
+{
+  auto saucer = new CAsteroidsSmallSaucer(app_);
 
   addObject(saucer);
 
@@ -92,21 +111,17 @@ move()
   for (auto &object : objects_)
     object->move();
 
-  std::list<CAsteroidsObject *> oldObjects;
-  std::list<CAsteroidsObject *> newObjects;
+  Objects oldObjects, newObjects;
 
-  auto p1 = objects_.begin();
-  auto p2 = objects_.end  ();
-
-  for ( ; p1 != p2; ++p1) {
-    if ((*p1)->getRemove())
-      oldObjects.push_back(*p1);
+  for (auto &object : objects_) {
+    if (object->isRemove())
+      oldObjects.push_back(object);
     else
-      newObjects.push_back(*p1);
+      newObjects.push_back(object);
   }
 
-  for (p1 = oldObjects.begin(), p2 = oldObjects.end(); p1 != p2; ++p1)
-    (*p1)->destroy();
+  for (auto &oldObject : oldObjects)
+    oldObject->destroy();
 
   objects_ = newObjects;
 }
@@ -130,17 +145,15 @@ draw()
 //-------
 
 CAsteroidsObject::
-CAsteroidsObject(const CAsteroids &app, double x, double y, double a,
-                 double dx, double dy, double da, double size,
-                 int score, bool wrap_on_edge) :
- app_(app), x_(x), y_(y), a_(a), dx_(dx), dy_(dy), da_(da),
- size_(size), score_(score), wrap_on_edge_(wrap_on_edge),
- draw_coords_(), num_draw_coords_(0),
- coll_coords_(), num_coll_coords_(0)
+CAsteroidsObject(const CAsteroids &app, Type type, const CPoint2D &p, double a,
+                 const CVector2D &v, double da, double size, int score,
+                 bool wrap_on_edge) :
+ app_(app), type_(type), p_(p), v_(v), angle_(a), da_(da), size_(size),
+ score_(score), wrap_on_edge_(wrap_on_edge)
 {
   remove_ = false;
 
-  matrix_.setRotation(2*M_PI*a_);
+  matrix_.setRotation(2*M_PI*angle_);
 }
 
 CAsteroidsObject::
@@ -150,14 +163,14 @@ CAsteroidsObject::
 
 void
 CAsteroidsObject::
-setDrawCoords(CPoint2D *draw_coords, uint num_draw_coords)
+setDrawCoords(const Points &draw_coords)
 {
-  num_draw_coords_ = num_draw_coords;
+  auto num_draw_coords = draw_coords.size();
 
   draw_coords_ .resize(num_draw_coords);
   draw_coords1_.resize(num_draw_coords);
 
-  for (uint i = 0; i < num_draw_coords; ++i)
+  for (std::size_t i = 0; i < num_draw_coords; ++i)
     draw_coords_[i] = draw_coords[i];
 
   updateDrawCoords();
@@ -165,14 +178,14 @@ setDrawCoords(CPoint2D *draw_coords, uint num_draw_coords)
 
 void
 CAsteroidsObject::
-setCollisionCoords(CPoint2D *coll_coords, uint num_coll_coords)
+setCollisionCoords(const Points &coll_coords)
 {
-  num_coll_coords_ = num_coll_coords;
+  auto num_coll_coords = coll_coords.size();
 
   coll_coords_ .resize(num_coll_coords);
   coll_coords1_.resize(num_coll_coords);
 
-  for (uint i = 0; i < num_coll_coords; ++i)
+  for (std::size_t i = 0; i < num_coll_coords; ++i)
     coll_coords_[i] = coll_coords[i];
 
   updateCollisionCoords();
@@ -182,29 +195,30 @@ void
 CAsteroidsObject::
 move()
 {
-  x_ += dx_;
-  y_ += dy_;
-  a_ += da_;
+  v_     += a_;
+  p_     += v_;
+  angle_ += da_;
 
   if (wrap_on_edge_) {
-    if (x_ > 1.0) x_ = 0.0;
-    if (x_ < 0.0) x_ = 1.0;
-    if (y_ > 1.0) y_ = 0.0;
-    if (y_ < 0.0) y_ = 1.0;
+    if (p_.x > 1.0) p_.x = 0.0;
+    if (p_.x < 0.0) p_.x = 1.0;
+    if (p_.y > 1.0) p_.y = 0.0;
+    if (p_.y < 0.0) p_.y = 1.0;
   }
   else {
-    if (x_ > 1.0) remove_ = true;
-    if (x_ < 0.0) remove_ = true;
-    if (y_ > 1.0) remove_ = true;
-    if (y_ < 0.0) remove_ = true;
+    if (p_.x > 1.0) remove();
+    if (p_.x < 0.0) remove();
+    if (p_.y > 1.0) remove();
+    if (p_.y < 0.0) remove();
   }
 
-  if (a_ < 0.0) a_ += 1.0;
-  if (a_ > 1.0) a_ -= 1.0;
+  if (angle_ < 0.0) angle_ += 1.0;
+  if (angle_ > 1.0) angle_ -= 1.0;
 
-  matrix_.setRotation(2*M_PI*a_);
+  matrix_.setRotation(2*M_PI*angle_);
 
   updateDrawCoords();
+
   updateCollisionCoords();
 }
 
@@ -212,21 +226,19 @@ void
 CAsteroidsObject::
 updateDrawCoords()
 {
-  double x, y;
-
-  for (int i = 0; i < num_draw_coords_; i++) {
-    x = draw_coords_[i].x*size_;
-    y = draw_coords_[i].y*size_;
+  for (std::size_t i = 0; i < draw_coords_.size(); ++i) {
+    double x = draw_coords_[i].x*size_;
+    double y = draw_coords_[i].y*size_;
 
     matrix_.multiplyPoint(x, y, &draw_coords1_[i].x, &draw_coords1_[i].y);
 
-    draw_coords1_[i].x += x_;
-    draw_coords1_[i].y += y_;
+    draw_coords1_[i].x += p_.x;
+    draw_coords1_[i].y += p_.y;
   }
 
   bbox_.reset();
 
-  for (int i = 0; i < num_draw_coords_; ++i)
+  for (std::size_t i = 0; i < draw_coords_.size(); ++i)
     bbox_.add(draw_coords1_[i]);
 }
 
@@ -234,57 +246,58 @@ void
 CAsteroidsObject::
 updateCollisionCoords()
 {
-  double x, y;
-
-  for (int i = 0; i < num_coll_coords_; i++) {
-    x = coll_coords_[i].x*size_;
-    y = coll_coords_[i].y*size_;
+  for (std::size_t i = 0; i < coll_coords_.size(); ++i) {
+    double x = coll_coords_[i].x*size_;
+    double y = coll_coords_[i].y*size_;
 
     matrix_.multiplyPoint(x, y, &coll_coords1_[i].x, &coll_coords1_[i].y);
 
-    coll_coords1_[i].x += x_;
-    coll_coords1_[i].y += y_;
+    coll_coords1_[i].x += p_.x;
+    coll_coords1_[i].y += p_.y;
   }
 }
 
 bool
 CAsteroidsObject::
-pointInside(double x, double y)
+pointInside(const CPoint2D &p) const
 {
-  if (! bbox_.inside(x, y))
+  if (! bbox_.inside(p.x, p.y))
     return false;
 
-  CPolygon2D poly(&coll_coords1_[0], num_coll_coords_);
+  if (! CMathGeom2D::PointInsideConvex(p, &coll_coords1_[0], coll_coords_.size()))
+    return false;
 
-  return poly.inside(CPoint2D(x, y));
+  return true;
+}
+
+bool
+CAsteroidsObject::
+intersectObj(const CAsteroidsObject *obj) const
+{
+  std::vector<CPoint2D> ipoints;
+
+  if (! CMathGeom2D::IntersectPolygons(coll_coords1_, obj->coll_coords1_, ipoints))
+    return false;
+
+  return true;
 }
 
 void
 CAsteroidsObject::
 draw()
 {
-  if (remove_) return;
+  if (isRemove()) return;
 
-  int i1 = num_draw_coords_ - 1;
-  int i2 = 0;
+  if (app_.isColored())
+     app_.setColor(color());
 
-  for ( ; i2 < num_draw_coords_; ++i2) {
-    app_.drawLine(draw_coords1_[i1].x, draw_coords1_[i1].y,
-                  draw_coords1_[i2].x, draw_coords1_[i2].y);
-
-    i1 = i2;
-  }
+  if (app_.isFilled())
+    app_.fillPolygon(draw_coords1_);
+  else
+    app_.drawPolygon(draw_coords1_);
 
 #ifdef SHOW_COLLISION
-  i1 = num_coll_coords_ - 1;
-  i2 = 0;
-
-  for ( ; i2 < num_coll_coords_; ++i2) {
-    app_.drawLine(coll_coords1_[i1].x, coll_coords1_[i1].y,
-                  coll_coords1_[i2].x, coll_coords1_[i2].y);
-
-    i1 = i2;
-  }
+  app_.drawPolygon(coll_coords1_);
 #endif
 
 #ifdef SHOW_BBOX
@@ -302,9 +315,16 @@ void
 CAsteroidsObject::
 hit()
 {
-  remove_ = true;
+  remove();
 
   app_.addScore(score_);
+}
+
+void
+CAsteroidsObject::
+remove()
+{
+  remove_ = true;
 }
 
 void

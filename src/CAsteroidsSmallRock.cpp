@@ -1,8 +1,9 @@
-#include <CAsteroidsLibI.h>
+#include <CAsteroidsSmallRock.h>
+#include <CAsteroids.h>
 
 CAsteroidsSmallRock::
-CAsteroidsSmallRock(const CAsteroids &app, double x, double y, double a,
-                    double dx, double dy, double da) :
- CAsteroidsRock(app, x, y, a, dx, dy, da, CASTEROIDS_ROCK_SMALL)
+CAsteroidsSmallRock(const CAsteroids &app, const CPoint2D &p, double a,
+                    const CVector2D &v, double da) :
+ CAsteroidsRock(app, p, a, v, da, CAsteroidsRockType::SMALL)
 {
 }

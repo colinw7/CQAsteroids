@@ -1,30 +1,13 @@
-#include <CAsteroidsLibI.h>
-#include <CFuncs.h>
-
-CPoint2D
-CAsteroidsBullet::
-draw_coords_[] = {
-  CPoint2D(-0.1, -0.1),
-  CPoint2D( 0.1, -0.1),
-  CPoint2D(-0.1,  0.1),
-  CPoint2D( 0.1,  0.1),
-};
-
-CPoint2D
-CAsteroidsBullet::
-collision_coords_[] = {
-  CPoint2D(-0.1, -0.1),
-  CPoint2D( 0.1, -0.1),
-  CPoint2D(-0.1,  0.1),
-  CPoint2D( 0.1,  0.1),
-};
-
-int CAsteroidsBullet::num_draw_coords_      = sizeof(draw_coords_)/sizeof(CPoint2D);
-int CAsteroidsBullet::num_collision_coords_ = sizeof(collision_coords_)/sizeof(CPoint2D);
+#include <CAsteroidsBullet.h>
+#include <CAsteroidsRock.h>
+#include <CAsteroidsSaucer.h>
+#include <CAsteroidsShip.h>
+#include <CAsteroids.h>
+#include <CAsteroidsShapeMgr.h>
 
 CAsteroidsBulletMgr::
-CAsteroidsBulletMgr(const CAsteroids &app) :
- app_(app)
+CAsteroidsBulletMgr(const CAsteroids &app, CAsteroidsObject *parent) :
+ app_(app), parent_(parent)
 {
 }
 
@@ -40,13 +23,15 @@ getNumBullets()
   return bullets_.size();
 }
 
-void
+CAsteroidsBullet *
 CAsteroidsBulletMgr::
-addBullet(double x, double y, double a, double size, double speed, double life)
+addBullet(const CPoint2D &p, double a, double size, double speed, double life)
 {
-  CAsteroidsBullet *bullet = new CAsteroidsBullet(app_, this, x, y, a, size, speed, life);
+  CAsteroidsBullet *bullet = new CAsteroidsBullet(app_, this, p, a, size, speed, life);
 
   bullets_.push_back(bullet);
+
+  return bullet;
 }
 
 void
@@ -60,28 +45,34 @@ removeBullet(CAsteroidsBullet *bullet)
 
 void
 CAsteroidsBulletMgr::
+reset()
+{
+  for (auto &bullet : bullets_)
+    delete bullet;
+
+  bullets_.clear();
+}
+
+void
+CAsteroidsBulletMgr::
 move()
 {
   for (auto &bullet : bullets_)
     bullet->move();
 
-  std::list<CAsteroidsBullet *> oldObjects;
-  std::list<CAsteroidsBullet *> newObjects;
+  Bullets oldBullets, newBullets;
 
-  auto p1 = bullets_.begin();
-  auto p2 = bullets_.end  ();
-
-  for ( ; p1 != p2; ++p1) {
-    if ((*p1)->getRemove())
-      oldObjects.push_back(*p1);
+  for (const auto &bullet : bullets_) {
+    if (bullet->isRemove())
+      oldBullets.push_back(bullet);
     else
-      newObjects.push_back(*p1);
+      newBullets.push_back(bullet);
   }
 
-  for (p1 = oldObjects.begin(), p2 = oldObjects.end(); p1 != p2; ++p1)
-    (*p1)->destroy();
+  for (auto &bullet : oldBullets)
+    bullet->destroy();
 
-  bullets_ = newObjects;
+  bullets_ = newBullets;
 }
 
 void
@@ -103,20 +94,18 @@ draw()
 //-------
 
 CAsteroidsBullet::
-CAsteroidsBullet(const CAsteroids &app, CAsteroidsBulletMgr *bullet_mgr,
-                 double x, double y, double a, double size, double speed, double life) :
- CAsteroidsObject(app, x, y, a, 0.0, 0.0, 0.0, size, 0, true),
- bullet_mgr_(bullet_mgr), speed_(speed), life_(life)
+CAsteroidsBullet(const CAsteroids &app, CAsteroidsBulletMgr *bulletMgr,
+                 const CPoint2D &p, double a, double size, double speed, double life) :
+ CAsteroidsObject(app, CAsteroidsObject::Type::BULLET, p, a, CVector2D(0.0, 0.0), 0.0,
+                  size, 0, true),
+ bulletMgr_(bulletMgr), speed_(speed), life_(life)
 {
-  matrix_.setRotation(2*M_PI*a_);
-
-  matrix_.multiplyPoint(speed_, 0, &dx_, &dy_);
+  setDirection(a);
 
   d_ = 0.0;
 
-  setDrawCoords(draw_coords_, num_draw_coords_);
-
-  setCollisionCoords(collision_coords_, num_collision_coords_);
+  setDrawCoords     (CAsteroidsShapeMgrInst->drawPoints     (CAsteroidsShapeMgr::Type::BULLET));
+  setCollisionCoords(CAsteroidsShapeMgrInst->collisionPoints(CAsteroidsShapeMgr::Type::BULLET));
 }
 
 CAsteroidsBullet::
@@ -126,12 +115,35 @@ CAsteroidsBullet::
 
 void
 CAsteroidsBullet::
+setDirection(double a)
+{
+  angle_ = a;
+
+  matrix_.setRotation(2*M_PI*angle_);
+
+  double dx, dy;
+
+  matrix_.multiplyPoint(speed_, 0, &dx, &dy);
+
+  v_ = CVector2D(dx, dy);
+}
+
+void
+CAsteroidsBullet::
 move()
 {
+  if (target_) {
+    const CPoint2D &pos = target_->pos();
+
+    double a = atan2(pos.y - p_.y, pos.x - p_.x)/(2*M_PI);
+
+    setDirection(a);
+  }
+
   d_ += speed_;
 
   if (d_ > life_)
-    remove_ = true;
+    remove();
 
   CAsteroidsObject::move();
 }
@@ -142,22 +154,32 @@ intersect()
 {
   intersectRocks();
 
-  intersectSaucers();
+  if      (bulletMgr_->parent()->type() == CAsteroidsObject::Type::SHIP) {
+    intersectSaucers(bulletMgr_->parent());
+  }
+  else if (bulletMgr_->parent()->type() == CAsteroidsObject::Type::SAUCER) {
+    CAsteroidsShip *ship = app_.getShip();
+
+    if (ship->pointInside(p_)) {
+      ship->destroy();
+
+      remove();
+    }
+  }
+  else
+    assert(false);
 }
 
 void
 CAsteroidsBullet::
 intersectRocks()
 {
-  auto rocks = app_.getRockMgr()->getRocks();
+  for (const auto &rock : app_.getRockMgr()->getRocks()) {
+    if (rock->pointInside(p_)) {
+      rock->hit();
 
-  auto prock1 = rocks.begin();
-  auto prock2 = rocks.end  ();
+      remove();
 
-  for ( ; prock1 != prock2; ++prock1) {
-    if ((*prock1)->pointInside(x_, y_)) {
-      (*prock1)->hit();
-      remove_ = true;
       break;
     }
   }
@@ -165,21 +187,17 @@ intersectRocks()
 
 void
 CAsteroidsBullet::
-intersectSaucers()
+intersectSaucers(CAsteroidsObject *parent)
 {
-  CAsteroidsSaucerMgr *saucer_mgr = app_.getSaucerMgr();
+  CAsteroidsSaucer *saucer = app_.getSaucerMgr()->getVisibleSaucer();
 
-  auto saucers = saucer_mgr->getSaucers();
+  if (! saucer || saucer == parent)
+    return;
 
-  auto psaucer1 = saucers.begin();
-  auto psaucer2 = saucers.end  ();
+  if (saucer->pointInside(p_)) {
+    saucer->hit();
 
-  for ( ; psaucer1 != psaucer2; ++psaucer1) {
-    if ((*psaucer1)->pointInside(x_, y_)) {
-      (*psaucer1)->hit();
-      remove_ = true;
-      break;
-    }
+    remove();
   }
 }
 
@@ -187,5 +205,5 @@ void
 CAsteroidsBullet::
 destroy()
 {
-  bullet_mgr_->removeBullet(this);
+  bulletMgr_->removeBullet(this);
 }

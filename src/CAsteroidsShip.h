@@ -1,44 +1,62 @@
+#ifndef CAsteroidsShip_H
+#define CAsteroidsShip_H
+
+#include <CAsteroidsObject.h>
+
+class CAsteroidsBulletMgr;
+
 class CAsteroidsShip : public CAsteroidsObject {
- private:
-  static CPoint2D draw_coords_[];
-  static uint     num_draw_coords_;
-
-  static CPoint2D collision_coords_[];
-  static uint     num_collision_coords_;
-
-  CAsteroidsBulletMgr bullet_mgr_;
-
-  double rotateSpeed_;
-  double thrust_;
-  double thrustMax_;
-  double bulletSize_;
-  double bulletSpeed_;
-  double bulletLife_;
-  int    bulletNum_;
-
-  int ai_;
-
-  bool visible_;
-
  public:
-  CAsteroidsShip(const CAsteroids &app,
-                 double  x=0.5, double  y=0.5, double  a=0.0,
-                 double dx=0.0, double dy=0.0, double da=0.0);
+  CAsteroidsShip(const CAsteroids &app, const CPoint2D &p=CPoint2D(0.5, 0.5), double a=0.0,
+                 const CVector2D &v=CVector2D(0.0, 0.0), double da=0.0);
+
+ ~CAsteroidsShip();
 
   void init();
 
+  void resetPosition();
+
+  bool isVisible() const { return visible_; }
   void setVisible(bool visible) { visible_ = visible; }
 
-  void move();
+  CRGBA color() const override;
 
-  void intersect();
+  void move() override;
 
-  void turnLeft();
+  void intersect() override;
+
+  void turnLeft ();
   void turnRight();
-  void turnStop();
-  void thrust();
-  bool fire();
-  void hyperspace();
+  void turnStop ();
 
-  void draw();
+  bool thrust();
+
+  void stopThrust();
+
+  bool fire();
+
+  bool hyperspace();
+
+  void destroy();
+
+  void draw() override;
+
+  void hit() override;
+
+ private:
+  CAsteroidsBulletMgr *bulletMgr_ = { nullptr };
+
+  double rotateSpeed_ { 0.008 };
+  double thrust_      { 0.003 };
+  double thrustMax_   { 0.01 };
+  double bulletSize_  { 0.02 };
+  double bulletSpeed_ { 0.01 };
+  double bulletLife_  { 0.6 };
+  int    bulletNum_   { 4 };
+
+  bool visible_     { true };
+  int  exploding_   { 0 };
+  int  invunerable_ { 0 };
 };
+
+#endif

@@ -6,6 +6,12 @@ QT += widgets multimedia
 
 DEPENDPATH += .
 
+MOC_DIR = .moc
+
+DESTDIR     = ../bin
+OBJECTS_DIR = ../obj
+LIB_DIR     = ../lib
+
 QMAKE_CXXFLAGS += -std=c++14
 
 INCLUDEPATH += \
@@ -22,6 +28,7 @@ INCLUDEPATH += \
 ../../COS/include \
 
 SOURCES += \
+main.cpp \
 CQAsteroids.cpp \
 CAsteroidsBigRock.cpp \
 CAsteroidsBigSaucer.cpp \
@@ -35,6 +42,12 @@ CAsteroidsScore.cpp \
 CAsteroidsShip.cpp \
 CAsteroidsSmallRock.cpp \
 CAsteroidsSmallSaucer.cpp \
+CAsteroidsExplosion.cpp \
+CAsteroidsShapeMgr.cpp \
+CAsteroidsRenderer.cpp \
+CQCanvas2D.cpp \
+CQSound.cpp \
+CSDLSound.cpp \
 
 HEADERS += \
 CQAsteroids.h \
@@ -42,8 +55,6 @@ CAsteroidsBigRock.h \
 CAsteroidsBigSaucer.h \
 CAsteroidsBullet.h \
 CAsteroids.h \
-CAsteroidsLib.h \
-CAsteroidsLibI.h \
 CAsteroidsMediumRock.h \
 CAsteroidsObject.h \
 CAsteroidsRock.h \
@@ -52,6 +63,26 @@ CAsteroidsScore.h \
 CAsteroidsShip.h \
 CAsteroidsSmallRock.h \
 CAsteroidsSmallSaucer.h \
-CAsteroidsTypes.h \
+CAsteroidsExplosion.h \
+CAsteroidsShapeMgr.h \
+CAsteroidsRenderer.h \
+CQCanvas2D.h \
+CQSound.h \
+CSDLSound.h \
 
-unix:LIBS += -lSDL2 -lSDL2_mixer
+unix:LIBS += \
+-L../../CVFont/lib \
+-L../../CQUtil/lib \
+-L../../CImageLib/lib \
+-L../../CFont/lib \
+-L../../CConfig/lib \
+-L../../CFileUtil/lib \
+-L../../CFile/lib \
+-L../../CMath/lib \
+-L../../CStrUtil/lib \
+-L../../CRegExp/lib \
+-L../../CUtil/lib \
+-L../../COS/lib \
+-lCVFont -lCQUtil -lCImageLib -lCFont \
+-lCConfig -lCFileUtil -lCFile -lCMath -lCStrUtil -lCRegExp -lCUtil -lCOS \
+-lSDL2 -lSDL2_mixer -lpng -ljpeg -ltre

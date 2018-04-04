@@ -1,77 +1,82 @@
-enum CAsteroidsRockType {
-  CASTEROIDS_ROCK_BIG,
-  CASTEROIDS_ROCK_MEDIUM,
-  CASTEROIDS_ROCK_SMALL
+#ifndef CAsteroidsRock_H
+#define CAsteroidsRock_H
+
+#include <CAsteroidsObject.h>
+#include <list>
+
+enum class CAsteroidsRockType {
+  BIG,
+  MEDIUM,
+  SMALL
 };
 
+class CAsteroids;
+class CAsteroidsRock;
 class CAsteroidsBigRock;
 class CAsteroidsMediumRock;
 class CAsteroidsSmallRock;
 
 class CAsteroidsRockMgr {
- private:
-  typedef std::list<CAsteroidsRock *> RockList;
-
-  const CAsteroids &app_;
-
-  uint   big_rock_score_;
-  double big_rock_size_;
-  uint   medium_rock_score_;
-  double medium_rock_size_;
-  uint   small_rock_score_;
-  double small_rock_size_;
-
-  RockList rocks_;
+ public:
+  using RockList = std::list<CAsteroidsRock *>;
 
  public:
   CAsteroidsRockMgr(const CAsteroids &app);
 
-  CAsteroidsBigRock    *createBigRock(double x, double y, double a,
-                                      double dx, double dy, double da);
-  CAsteroidsMediumRock *createMediumRock(double x, double y, double a,
-                                         double dx, double dy, double da);
-  CAsteroidsSmallRock  *createSmallRock(double x, double y, double a,
-                                        double dx, double dy, double da);
+  CAsteroidsBigRock    *createBigRock(const CPoint2D &p, double a,
+                                      const CVector2D &v, double da);
+  CAsteroidsMediumRock *createMediumRock(const CPoint2D &p, double a,
+                                         const CVector2D &v, double da);
+  CAsteroidsSmallRock  *createSmallRock(const CPoint2D &p, double a,
+                                        const CVector2D &v, double da);
 
   const RockList getRocks   () { return rocks_; }
-  uint           getNumRocks() { return rocks_.size(); }
+  std::size_t    getNumRocks() { return rocks_.size(); }
 
   void removeRock(CAsteroidsRock *rock);
 
   void removeAll();
 
-  uint   getBigRockScore   () const { return big_rock_score_   ; }
+  int    getBigRockScore   () const { return big_rock_score_   ; }
   double getBigRockSize    () const { return big_rock_size_    ; }
-  uint   getMediumRockScore() const { return medium_rock_score_; }
+  int    getMediumRockScore() const { return medium_rock_score_; }
   double getMediumRockSize () const { return medium_rock_size_ ; }
-  uint   getSmallRockScore () const { return small_rock_score_ ; }
+  int    getSmallRockScore () const { return small_rock_score_ ; }
   double getSmallRockSize  () const { return small_rock_size_  ; }
 
  private:
   void addRock(CAsteroidsRock *rock);
+
+ private:
+  const CAsteroids &app_;
+
+  int    big_rock_score_    { 20 };
+  double big_rock_size_     { 0.0700 };
+  int    medium_rock_score_ { 50 };
+  double medium_rock_size_  { 0.0350 };
+  int    small_rock_score_  { 100 };
+  double small_rock_size_   { 0.0175 };
+
+  RockList rocks_;
 };
 
+//------
+
 class CAsteroidsRock : public CAsteroidsObject {
- private:
-  static CPoint2D draw_coords1_[];
-  static uint     num_draw_coords1_;
-  static CPoint2D draw_coords2_[];
-  static uint     num_draw_coords2_;
-  static CPoint2D draw_coords3_[];
-  static uint     num_draw_coords3_;
-
-  static CPoint2D collision_coords_[];
-  static uint     num_collision_coords_;
-
-  static uint current_rock_num_;
-
-  uint rock_num_;
-
  public:
-  CAsteroidsRock(const CAsteroids &app, double x, double y, double a,
-                 double dx, double dy, double da, CAsteroidsRockType type);
+  CAsteroidsRock(const CAsteroids &app, const CPoint2D &p, double a,
+                 const CVector2D &v, double da, CAsteroidsRockType type);
 
   virtual ~CAsteroidsRock();
 
-  void destroy();
+  void destroy() override;
+
+  void hit() override;
+
+ private:
+  static int current_rock_num_;
+
+  int rock_num_ { 0 };
 };
+
+#endif

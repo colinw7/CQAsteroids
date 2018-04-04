@@ -1,16 +1,26 @@
 #ifndef CAsteroidsBullet_H
 #define CAsteroidsBullet_H
 
+#include <CAsteroidsObject.h>
+
+class CAsteroidsBullet;
+class CAstreroidsObject;
+
 class CAsteroidsBulletMgr {
  public:
-  CAsteroidsBulletMgr(const CAsteroids &app);
+  CAsteroidsBulletMgr(const CAsteroids &app, CAsteroidsObject *parent);
  ~CAsteroidsBulletMgr();
+
+  CAsteroidsObject *parent() const { return parent_; }
 
   int getNumBullets();
 
-  void addBullet(double x, double y, double a, double size, double speed, double life);
+  CAsteroidsBullet *addBullet(const CPoint2D &p, double a,
+                              double size, double speed, double life);
 
   void removeBullet(CAsteroidsBullet *bullet);
+
+  void reset();
 
   void move();
 
@@ -19,41 +29,44 @@ class CAsteroidsBulletMgr {
   void draw();
 
  private:
-  const CAsteroids&             app_;
-  std::list<CAsteroidsBullet *> bullets_;
+  using Bullets = std::list<CAsteroidsBullet *>;
+
+  const CAsteroids& app_;
+  CAsteroidsObject* parent_ { nullptr };
+  Bullets           bullets_;
 };
 
 //---
 
 class CAsteroidsBullet : public CAsteroidsObject {
  public:
-  CAsteroidsBullet(const CAsteroids &app, CAsteroidsBulletMgr *bullet_mgr,
-                   double x, double y, double a,
-                   double size, double speed, double life);
+  CAsteroidsBullet(const CAsteroids &app, CAsteroidsBulletMgr *bulletMgr,
+                   const CPoint2D &p, double a, double size, double speed, double life);
  ~CAsteroidsBullet();
 
-  void move();
+  CAsteroidsObject *target() const { return target_; }
+  void setTarget(CAsteroidsObject *obj) { target_ = obj; }
 
-  void intersect();
-  void intersectRocks();
-  void intersectSaucers();
+  void setDirection(double a);
 
-  void destroy();
+  void move() override;
+
+  void intersect() override;
+
+  void intersectRocks  ();
+  void intersectSaucers(CAsteroidsObject *parent);
+
+  void destroy() override;
 
  private:
-  static CPoint2D draw_coords_[];
-  static int      num_draw_coords_;
+  CAsteroidsBulletMgr *bulletMgr_ = nullptr;
 
-  static CPoint2D collision_coords_[];
-  static int      num_collision_coords_;
+  double speed_ { 0.0 };
+  double life_  { 0.0 };
 
-  CAsteroidsBulletMgr *bullet_mgr_;
+  double d_ { 0.0 };
 
-  double size_;
-  double speed_;
-  double life_;
-
-  double d_;
+  CAsteroidsObject *target_ { nullptr };
 };
 
 #endif

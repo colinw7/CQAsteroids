@@ -1,11 +1,17 @@
+#ifndef CAsteroidsMediumRock_H
+#define CAsteroidsMediumRock_H
+
+#include <CAsteroidsRock.h>
+
 class CAsteroidsMediumRock : public CAsteroidsRock {
+ public:
+  CAsteroidsMediumRock(const CAsteroids &app, const CPoint2D &p, double a,
+                       const CVector2D &v, double da);
+
+  void hit() override;
+
  private:
   static double default_size_;
-
- public:
-  CAsteroidsMediumRock(const CAsteroids &app,
-                       double x, double y, double a,
-                       double dx, double dy, double da);
-
-  void hit();
 };
+
+#endif
