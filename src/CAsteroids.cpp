@@ -5,6 +5,7 @@
 #include <CAsteroidsScore.h>
 #include <CAsteroidsExplosion.h>
 #include <CAsteroidsObject.h>
+#include <CAsteroidsShapeMgr.h>
 #include <CAsteroidsRenderer.h>
 
 #include <CLFont.h>
@@ -23,6 +24,7 @@ CAsteroids(CAsteroidsRenderer *renderer) :
   objectMgr_    = new CAsteroidsObjectMgr   (*this);
   saucerMgr_    = new CAsteroidsSaucerMgr   (*this);
   explosionMgr_ = new CAsteroidsExplosionMgr(*this);
+  shapeMgr_     = new CAsteroidsShapeMgr    (*this);
 
   score_ = new CAsteroidsScore(*this);
 
@@ -88,10 +90,10 @@ nextLevel()
 {
   ++level_;
 
-  objectMgr_->createBigRock(CPoint2D(0.0, 0.0), 0.0, CVector2D( 0.003,  0.003), 0.003);
-  objectMgr_->createBigRock(CPoint2D(1.0, 0.0), 0.0, CVector2D(-0.004,  0.004), 0.004);
-  objectMgr_->createBigRock(CPoint2D(0.0, 1.0), 0.0, CVector2D( 0.005, -0.005), 0.005);
-  objectMgr_->createBigRock(CPoint2D(1.0, 1.0), 0.0, CVector2D(-0.006, -0.006), 0.006);
+  objectMgr_->createBigRock(CPoint2D(0.0, 0.0), 0.0, scaledSpeed( 0.05,  0.05), 0.003);
+  objectMgr_->createBigRock(CPoint2D(1.0, 0.0), 0.0, scaledSpeed(-0.06,  0.06), 0.004);
+  objectMgr_->createBigRock(CPoint2D(0.0, 1.0), 0.0, scaledSpeed( 0.07, -0.07), 0.005);
+  objectMgr_->createBigRock(CPoint2D(1.0, 1.0), 0.0, scaledSpeed(-0.08, -0.08), 0.006);
 }
 
 void
@@ -183,6 +185,8 @@ update()
 
   setColor(CRGBA(1,1,1));
 
+  //---
+
   objectMgr_->draw();
 
   explosionMgr_->draw();
@@ -252,13 +256,6 @@ drawLine(const CPoint2D &p1, const CPoint2D &p2) const
 
 void
 CAsteroids::
-drawLine(double x1, double y1, double x2, double y2) const
-{
-  drawLine(CPoint2D(x1, y1), CPoint2D(x2, y2));
-}
-
-void
-CAsteroids::
 drawCenteredString(const CPoint2D &p, double size, const std::string &str) const
 {
   drawString(CPoint2D(p.x - size*str.size()/2.0, p.y), size, str);
@@ -320,6 +317,20 @@ shipDestroyed() const
 
     th->setGameOver(true);
   }
+}
+
+double
+CAsteroids::
+scaledValue(double v) const
+{
+  return v/refresh();
+}
+
+CVector2D
+CAsteroids::
+scaledSpeed(double x, double y) const
+{
+  return CVector2D(x/refresh(), y/refresh());
 }
 
 bool

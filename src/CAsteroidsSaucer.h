@@ -32,7 +32,7 @@ class CAsteroidsSaucerMgr {
   int    getBigSaucerScore       () const { return bigSaucerScore_       ; }
   double getBigSaucerBulletSize  () const { return bigSaucerBulletSize_  ; }
   double getBigSaucerBulletSpeed () const { return bigSaucerBulletSpeed_ ; }
-  double getBigSaucerBulletLife  () const { return bigSaucerBulletLife_  ; }
+  int    getBigSaucerBulletLife  () const { return bigSaucerBulletLife_  ; }
   int    getBigSaucerBulletNum   () const { return bigSaucerBulletNum_   ; }
   int    getBigSaucerFireInterval() const { return bigSaucerFireInterval_; }
 
@@ -40,7 +40,7 @@ class CAsteroidsSaucerMgr {
   int    getSmallSaucerScore       () const { return smallSaucerScore_      ; }
   double getSmallSaucerBulletSize  () const { return smallSaucerBulletSize_ ; }
   double getSmallSaucerBulletSpeed () const { return smallSaucerBulletSpeed_; }
-  double getSmallSaucerBulletLife  () const { return smallSaucerBulletLife_ ; }
+  int    getSmallSaucerBulletLife  () const { return smallSaucerBulletLife_ ; }
   int    getSmallSaucerBulletNum   () const { return smallSaucerBulletNum_  ; }
   int    getSmallSaucerFireInterval() const { return smallSaucerFireInterval_; }
 
@@ -66,20 +66,20 @@ class CAsteroidsSaucerMgr {
   int    bigSaucerScore_        = 500;
   double bigSaucerSize_         = 0.03;
   double bigSaucerBulletSize_   = 0.01;
-  double bigSaucerBulletSpeed_  = 0.01;
-  double bigSaucerBulletLife_   = 0.6;
+  double bigSaucerBulletSpeed_  = 0.3;
+  int    bigSaucerBulletLife_   = 100;
   int    bigSaucerBulletNum_    = 4;
   int    bigSaucerDelay_        = 250;
-  int    bigSaucerFireInterval_ = 10;
+  int    bigSaucerFireInterval_ = 20;
 
   int    smallSaucerScore_        = 1000;
   double smallSaucerSize_         = 0.015;
   double smallSaucerBulletSize_   = 0.01;
-  double smallSaucerBulletSpeed_  = 0.01;
-  double smallSaucerBulletLife_   = 0.6;
+  double smallSaucerBulletSpeed_  = 0.2;
+  int    smallSaucerBulletLife_   = 100;
   int    smallSaucerBulletNum_    = 4;
   int    smallSaucerDelay_        = 3;
-  int    smallSaucerFireInterval_ = 5;
+  int    smallSaucerFireInterval_ = 30;
 };
 
 //---
@@ -107,16 +107,16 @@ class CAsteroidsSaucer : public CAsteroidsObject {
 
   void hit() override;
 
-  void remove() override;
+  void removeLater() override;
 
  private:
   CAsteroidsBulletMgr* bulletMgr_    { nullptr };
-  CAsteroidsSaucerType type_         { CAsteroidsSaucerType::NONE };
+  CAsteroidsSaucerType saucerType_   { CAsteroidsSaucerType::NONE };
   double               bulletSize_   { 0.01 };
-  double               bulletSpeed_  { 0.01 };
-  double               bulletLife_   { 0.6 };
+  double               bulletSpeed_  { 0.2 };
+  int                  bulletLife_   { 100 };
   int                  bulletNum_    { 4 };
-  int                  fireInterval_ { 5 };
+  int                  fireInterval_ { 20 };
   int                  t_            { 0 };
   bool                 visible_      { false };
 };

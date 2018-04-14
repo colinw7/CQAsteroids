@@ -46,12 +46,12 @@ class CAsteroidsShip : public CAsteroidsObject {
  private:
   CAsteroidsBulletMgr *bulletMgr_ = { nullptr };
 
-  double rotateSpeed_ { 0.008 };
-  double thrust_      { 0.003 };
+  double rotateSpeed_ { 0.50 };
+  double thrustSize_  { 0.0003 };
   double thrustMax_   { 0.01 };
   double bulletSize_  { 0.02 };
-  double bulletSpeed_ { 0.01 };
-  double bulletLife_  { 0.6 };
+  double bulletSpeed_ { 0.3 };
+  int    bulletLife_  { 100 };
   int    bulletNum_   { 4 };
 
   bool visible_     { true };

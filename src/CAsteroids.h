@@ -2,6 +2,7 @@
 #define CAsteroids_H
 
 #include <CPoint2D.h>
+#include <CVector2D.h>
 #include <CRGBA.h>
 #include <vector>
 
@@ -11,6 +12,7 @@ class CAsteroidsSaucerMgr;
 class CAsteroidsBulletMgr;
 class CAsteroidsRockMgr;
 class CAsteroidsExplosionMgr;
+class CAsteroidsShapeMgr;
 class CAsteroidsShip;
 class CAsteroidsScore;
 class CConfigFile;
@@ -29,6 +31,7 @@ class CAsteroids {
   CAsteroidsSaucerMgr    *getSaucerMgr   () const { return saucerMgr_   ; }
   CAsteroidsRockMgr      *getRockMgr     () const { return rockMgr_     ; }
   CAsteroidsExplosionMgr *getExplosionMgr() const { return explosionMgr_; }
+  CAsteroidsShapeMgr     *getShapeMgr    () const { return shapeMgr_    ; }
 
   CAsteroidsShip *getShip() const { return ship_; }
 
@@ -43,6 +46,8 @@ class CAsteroids {
 
   bool isShowStatus() const { return showStatus_; }
   void setShowStatus(bool b) { showStatus_ = b; }
+
+  double refresh() const { return refresh_; }
 
   void newGame();
 
@@ -72,8 +77,7 @@ class CAsteroids {
   void fillPolygon(const Points &points) const;
 
   void drawLine(const CPoint2D &p1, const CPoint2D &p2) const;
-
-  void drawLine(double x1, double y1, double x2, double y2) const;
+  //void drawLine(double x1, double y1, double x2, double y2) const;
 
   void drawCenteredString(const CPoint2D &p, double size, const std::string &str) const;
 
@@ -84,6 +88,10 @@ class CAsteroids {
   void addScore(int score) const;
 
   void shipDestroyed() const;
+
+  double scaledValue(double v) const;
+
+  CVector2D scaledSpeed(double x, double y) const;
 
   bool getConfigValue(const std::string &section,
                       const std::string &name, std::string &value) const;
@@ -102,6 +110,7 @@ class CAsteroids {
   CAsteroidsSaucerMgr*    saucerMgr_    { nullptr };
   CAsteroidsRockMgr*      rockMgr_      { nullptr };
   CAsteroidsExplosionMgr* explosionMgr_ { nullptr };
+  CAsteroidsShapeMgr*     shapeMgr_     { nullptr };
 
   CAsteroidsShip*         ship_         { nullptr };
   CAsteroidsScore*        score_        { nullptr };
@@ -113,6 +122,7 @@ class CAsteroids {
   bool                    colored_      { false };
   bool                    filled_       { false };
   bool                    showStatus_   { false };
+  double                  refresh_      { 60 };
 };
 
 #endif

@@ -147,9 +147,9 @@ draw()
 CAsteroidsObject::
 CAsteroidsObject(const CAsteroids &app, Type type, const CPoint2D &p, double a,
                  const CVector2D &v, double da, double size, int score,
-                 bool wrap_on_edge) :
+                 bool wrapOnEdge) :
  app_(app), type_(type), p_(p), v_(v), angle_(a), da_(da), size_(size),
- score_(score), wrap_on_edge_(wrap_on_edge)
+ score_(score), wrapOnEdge_(wrapOnEdge)
 {
   remove_ = false;
 
@@ -199,17 +199,17 @@ move()
   p_     += v_;
   angle_ += da_;
 
-  if (wrap_on_edge_) {
+  if (wrapOnEdge_) {
     if (p_.x > 1.0) p_.x = 0.0;
     if (p_.x < 0.0) p_.x = 1.0;
     if (p_.y > 1.0) p_.y = 0.0;
     if (p_.y < 0.0) p_.y = 1.0;
   }
   else {
-    if (p_.x > 1.0) remove();
-    if (p_.x < 0.0) remove();
-    if (p_.y > 1.0) remove();
-    if (p_.y < 0.0) remove();
+    if (p_.x > 1.0) removeLater();
+    if (p_.x < 0.0) removeLater();
+    if (p_.y > 1.0) removeLater();
+    if (p_.y < 0.0) removeLater();
   }
 
   if (angle_ < 0.0) angle_ += 1.0;
@@ -304,10 +304,10 @@ draw()
   double x1 = bbox_.getMin().x; double y1 = bbox_.getMin().y;
   double x2 = bbox_.getMax().x; double y2 = bbox_.getMax().y;
 
-  app_.drawLine(x1, y1, x2, y1);
-  app_.drawLine(x2, y1, x2, y2);
-  app_.drawLine(x2, y2, x1, y2);
-  app_.drawLine(x1, y2, x1, y1);
+  app_.drawLine(CPoint2D(x1, y1), CPoint2D(x2, y1));
+  app_.drawLine(CPoint2D(x2, y1), CPoint2D(x2, y2));
+  app_.drawLine(CPoint2D(x2, y2), CPoint2D(x1, y2));
+  app_.drawLine(CPoint2D(x1, y2), CPoint2D(x1, y1));
 #endif
 }
 
@@ -315,14 +315,14 @@ void
 CAsteroidsObject::
 hit()
 {
-  remove();
+  removeLater();
 
   app_.addScore(score_);
 }
 
 void
 CAsteroidsObject::
-remove()
+removeLater()
 {
   remove_ = true;
 }

@@ -8,8 +8,7 @@ class CAsteroidsSmallRock : public CAsteroidsRock {
   CAsteroidsSmallRock(const CAsteroids &app, const CPoint2D &p, double a,
                       const CVector2D &v, double da);
 
- private:
-  static double default_size_;
+  void hit() override;
 };
 
 #endif

@@ -15,8 +15,7 @@ class CAsteroidsBulletMgr {
 
   int getNumBullets();
 
-  CAsteroidsBullet *addBullet(const CPoint2D &p, double a,
-                              double size, double speed, double life);
+  CAsteroidsBullet *addBullet(const CPoint2D &p, double a, double size, double speed, int life);
 
   void removeBullet(CAsteroidsBullet *bullet);
 
@@ -41,7 +40,7 @@ class CAsteroidsBulletMgr {
 class CAsteroidsBullet : public CAsteroidsObject {
  public:
   CAsteroidsBullet(const CAsteroids &app, CAsteroidsBulletMgr *bulletMgr,
-                   const CPoint2D &p, double a, double size, double speed, double life);
+                   const CPoint2D &p, double a, double size, double speed, int life);
  ~CAsteroidsBullet();
 
   CAsteroidsObject *target() const { return target_; }
@@ -62,9 +61,8 @@ class CAsteroidsBullet : public CAsteroidsObject {
   CAsteroidsBulletMgr *bulletMgr_ = nullptr;
 
   double speed_ { 0.0 };
-  double life_  { 0.0 };
-
-  double d_ { 0.0 };
+  int    life_  { 100 };
+  int    age_   { 0 };
 
   CAsteroidsObject *target_ { nullptr };
 };

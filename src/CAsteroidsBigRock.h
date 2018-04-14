@@ -9,9 +9,6 @@ class CAsteroidsBigRock : public CAsteroidsRock {
                     const CVector2D &v, double da);
 
   void hit() override;
-
- private:
-  static double default_size_;
 };
 
 #endif

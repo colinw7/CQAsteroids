@@ -76,17 +76,17 @@ CAsteroidsExplosion(const CAsteroids &app, CAsteroidsObject *parent, const CPoin
   for (int i = 0; i < num_lines; ++i) {
     double dx = CMathRand::randInRange(-0.01, 0.01);
     double dy = CMathRand::randInRange(-0.01, 0.01);
-    double lx = CMathRand::randInRange( 0.5, 1.0);
-    double ly = CMathRand::randInRange( 0.5, 1.0);
-    double vx = CMathRand::randInRange( 0.5, 1.0);
-    double vy = CMathRand::randInRange( 0.5, 1.0);
+    double lx = CMathRand::randInRange(0.5, 1.0);
+    double ly = CMathRand::randInRange(0.5, 1.0);
+    double vx = CMathRand::randInRange(5, 10);
+    double vy = CMathRand::randInRange(5, 10);
 
-    CPoint2D p1(p_.x + dx, p_.y + dy);
+    CPoint2D p1(p_.x +    dx, p_.y +    dy);
     CPoint2D p2(p1.x + lx*dx, p1.y + ly*dy);
 
     Line l(p1, p2);
 
-    l.v = CVector2D(vx*dx, vy*dy);
+    l.v = app_.scaledSpeed(vx*dx, vy*dy);
 
     l.da = CMathRand::randInRange(0.0, 0.1);
 
@@ -128,14 +128,16 @@ void
 CAsteroidsExplosion::
 draw()
 {
-  double r = 1.0;
-  double g = 1.0;
-  double b = 0.0;
-  double a = 1.0/(50 - life_);
+  if (app_.isColored()) {
+    double r = 1.0;
+    double g = 1.0;
+    double b = 0.0;
+    double a = 1.0*life_/initLife_;
 
-  app_.setColor(CRGBA(r, g, b, a));
+    app_.setColor(CRGBA(r, g, b, a));
+  }
 
-  int nd = 0;
+  int numDrawn = 0;
 
   for (const auto &line : lines_) {
     if (line.life <= 0)
@@ -143,9 +145,9 @@ draw()
 
     app_.drawLine(line.p1, line.p2);
 
-    ++nd;
+    ++numDrawn;
   }
 
-  if (nd == 0)
-    remove();
+  if (numDrawn == 0)
+    removeLater();
 }

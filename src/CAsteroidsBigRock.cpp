@@ -1,5 +1,6 @@
 #include <CAsteroidsBigRock.h>
 #include <CAsteroids.h>
+#include <CMathRand.h>
 
 CAsteroidsBigRock::
 CAsteroidsBigRock(const CAsteroids &app, const CPoint2D &p, double a,
@@ -14,6 +15,11 @@ hit()
 {
   CAsteroidsRock::hit();
 
-  app_.getObjectMgr()->createMediumRock(p_, angle_ + 0.25, CVector2D(-v_.x(),  v_.y()), da_);
-  app_.getObjectMgr()->createMediumRock(p_, angle_ - 0.25, CVector2D( v_.x(), -v_.y()), da_);
+  double breakSpeed = CMathRand::randInRange(1.1, 1.3);
+
+  double vx = v_.x()*breakSpeed;
+  double vy = v_.y()*breakSpeed;
+
+  app_.getObjectMgr()->createMediumRock(p_, angle_ + 0.25, CVector2D(-vx,  vy), da_);
+  app_.getObjectMgr()->createMediumRock(p_, angle_ - 0.25, CVector2D( vx, -vy), da_);
 }

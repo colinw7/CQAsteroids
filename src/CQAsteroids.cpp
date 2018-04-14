@@ -94,7 +94,7 @@ CQAsteroidsApp() :
 
   connect(timer_, SIGNAL(timeout()), this, SLOT(update()));
 
-  timer_->start(50);
+  timer_->start(1000.0/asteroids_->refresh());
 }
 
 CQAsteroidsApp::
@@ -260,6 +260,10 @@ keyPressEvent(QKeyEvent *e)
     asteroids_->newGame();
   else if (key == Qt::Key_P)
     asteroids_->togglePause();
+  else if (key == Qt::Key_F1)
+    asteroids_->setColored(! asteroids_->isColored());
+  else if (key == Qt::Key_F2)
+    asteroids_->setFilled(! asteroids_->isFilled());
   else if (key == Qt::Key_E) {
     QPointF pos = mapFromGlobal(QCursor::pos());
 

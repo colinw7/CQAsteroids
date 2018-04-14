@@ -1,19 +1,8 @@
 #include <CAsteroidsShapeMgr.h>
 
-CAsteroidsShapeMgr *
 CAsteroidsShapeMgr::
-instance()
-{
-  static CAsteroidsShapeMgr *inst;
-
-  if (! inst)
-    inst = new CAsteroidsShapeMgr;
-
-  return inst;
-}
-
-CAsteroidsShapeMgr::
-CAsteroidsShapeMgr()
+CAsteroidsShapeMgr(const CAsteroids &app) :
+ app_(app)
 {
 }
 
@@ -177,14 +166,14 @@ collisionPoints(Type type)
     return ship_points;
   }
   else if (type == Type::SHIP_THRUST) {
-    static Points ship_points = {
+    static Points ship_thrust_points = {
       CPoint2D( 0.5,  0.0),
       CPoint2D(-0.5,  0.5),
       CPoint2D(-0.3,  0.0),
       CPoint2D(-0.5, -0.5)
     };
 
-    return ship_points;
+    return ship_thrust_points;
   }
   else if (type == Type::ROCK1) {
     static Points rock_points1 = {

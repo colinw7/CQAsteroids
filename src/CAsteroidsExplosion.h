@@ -45,8 +45,8 @@ class CAsteroidsExplosion : public CAsteroidsObject {
     CPoint2D  p1;
     CPoint2D  p2;
     CVector2D v;
-    double    da;
-    int       life;
+    double    da   { 0.0 };
+    int       life { 0 };
 
     Line(const CPoint2D &p1, const CPoint2D &p2) :
      p1(p1), p2(p2) {
@@ -55,9 +55,11 @@ class CAsteroidsExplosion : public CAsteroidsObject {
 
   using Lines = std::vector<Line>;
 
+  static const int initLife_ { 100 };
+
   CAsteroidsObject *parent_ = { nullptr };
   Lines             lines_;
-  int               life_ { 50 };
+  int               life_ { initLife_ };
 };
 
 #endif

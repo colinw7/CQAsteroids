@@ -1,11 +1,11 @@
 #ifndef CAsteroidsShapeMgr_H
 #define CAsteroidsShapeMgr_H
 
-#define CAsteroidsShapeMgrInst CAsteroidsShapeMgr::instance()
-
 #include <CPoint2D.h>
 #include <map>
 #include <vector>
+
+class CAsteroids;
 
 class CAsteroidsShapeMgr {
  public:
@@ -24,7 +24,7 @@ class CAsteroidsShapeMgr {
   using Points = std::vector<CPoint2D>;
 
  public:
-  static CAsteroidsShapeMgr *instance();
+  CAsteroidsShapeMgr(const CAsteroids &app);
 
   Points drawPoints(Type type);
   void setDrawPoints(Type type, const Points &points);
@@ -51,13 +51,11 @@ class CAsteroidsShapeMgr {
   std::string typeName(Type type) const;
 
  private:
-  CAsteroidsShapeMgr();
-
- private:
   using TypePoints = std::map<Type,Points>;
 
-  TypePoints drawTypePoints_;
-  TypePoints collisionTypePoints_;
+  const CAsteroids& app_;
+  TypePoints        drawTypePoints_;
+  TypePoints        collisionTypePoints_;
 };
 
 #endif

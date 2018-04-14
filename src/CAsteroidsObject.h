@@ -70,7 +70,7 @@ class CAsteroidsObject {
  public:
   CAsteroidsObject(const CAsteroids &app, Type type, const CPoint2D &pos, double a,
                    const CVector2D &v, double da, double size, int score,
-                   bool wrap_on_edge);
+                   bool wrapOnEdge);
 
   virtual ~CAsteroidsObject();
 
@@ -103,7 +103,7 @@ class CAsteroidsObject {
 
   virtual void hit();
 
-  virtual void remove();
+  virtual void removeLater();
 
   virtual void destroy();
 
@@ -125,7 +125,7 @@ class CAsteroidsObject {
   double            size_  { 0 };
   int               score_ { 0 };
 
-  bool              wrap_on_edge_ { false };
+  bool              wrapOnEdge_ { false };
 
   CMatrix2D         matrix_;
   bool              remove_ { false };

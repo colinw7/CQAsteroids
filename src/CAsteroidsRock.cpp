@@ -5,25 +5,25 @@
 #include <CAsteroids.h>
 #include <CAsteroidsShapeMgr.h>
 
-int CAsteroidsRock::current_rock_num_ = 0;
+int CAsteroidsRock::currentRockNum_ = 0;
 
 CAsteroidsRockMgr::
 CAsteroidsRockMgr(const CAsteroids &app) :
  app_(app)
 {
-  (void) app_.getConfigValue("BigRock"   , "score", big_rock_score_   );
-  (void) app_.getConfigValue("BigRock"   , "size" , big_rock_size_    );
-  (void) app_.getConfigValue("MediumRock", "score", medium_rock_score_);
-  (void) app_.getConfigValue("MediumRock", "size" , medium_rock_size_ );
-  (void) app_.getConfigValue("SmallRock" , "score", small_rock_score_ );
-  (void) app_.getConfigValue("SmallRock" , "size" , small_rock_size_  );
+  (void) app_.getConfigValue("BigRock"   , "score", bigRockScore_   );
+  (void) app_.getConfigValue("BigRock"   , "size" , bigRockSize_    );
+  (void) app_.getConfigValue("MediumRock", "score", mediumRockScore_);
+  (void) app_.getConfigValue("MediumRock", "size" , mediumRockSize_ );
+  (void) app_.getConfigValue("SmallRock" , "score", smallRockScore_ );
+  (void) app_.getConfigValue("SmallRock" , "size" , smallRockSize_  );
 }
 
 CAsteroidsBigRock *
 CAsteroidsRockMgr::
-createBigRock(const CPoint2D &p, double a, const CVector2D &v, double da)
+createBigRock(const CPoint2D &p, double angle, const CVector2D &v, double da)
 {
-  CAsteroidsBigRock *rock = new CAsteroidsBigRock(app_, p, a, v, da);
+  CAsteroidsBigRock *rock = new CAsteroidsBigRock(app_, p, angle, v, da);
 
   rocks_.push_back(rock);
 
@@ -32,9 +32,9 @@ createBigRock(const CPoint2D &p, double a, const CVector2D &v, double da)
 
 CAsteroidsMediumRock *
 CAsteroidsRockMgr::
-createMediumRock(const CPoint2D &p, double a, const CVector2D &v, double da)
+createMediumRock(const CPoint2D &p, double angle, const CVector2D &v, double da)
 {
-  CAsteroidsMediumRock *rock = new CAsteroidsMediumRock(app_, p, a, v, da);
+  CAsteroidsMediumRock *rock = new CAsteroidsMediumRock(app_, p, angle, v, da);
 
   rocks_.push_back(rock);
 
@@ -43,9 +43,9 @@ createMediumRock(const CPoint2D &p, double a, const CVector2D &v, double da)
 
 CAsteroidsSmallRock *
 CAsteroidsRockMgr::
-createSmallRock(const CPoint2D &p, double a, const CVector2D &v, double da)
+createSmallRock(const CPoint2D &p, double angle, const CVector2D &v, double da)
 {
-  CAsteroidsSmallRock *rock = new CAsteroidsSmallRock(app_, p, a, v, da);
+  CAsteroidsSmallRock *rock = new CAsteroidsSmallRock(app_, p, angle, v, da);
 
   rocks_.push_back(rock);
 
@@ -72,9 +72,9 @@ removeAll()
 //------
 
 CAsteroidsRock::
-CAsteroidsRock(const CAsteroids &app, const CPoint2D &p, double a,
+CAsteroidsRock(const CAsteroids &app, const CPoint2D &p, double angle,
                const CVector2D &v, double da, CAsteroidsRockType type) :
- CAsteroidsObject(app, CAsteroidsObject::Type::ROCK, p, a, v, da, 0.1, 0, true)
+ CAsteroidsObject(app, Type::ROCK, p, angle, v, da, 0.1, 0, true)
 {
   color_ = CRGBA(0.76, 0.57, 0.27);
 
@@ -91,17 +91,17 @@ CAsteroidsRock(const CAsteroids &app, const CPoint2D &p, double a,
     score_ = app_.getRockMgr()->getSmallRockScore();
   }
 
-  ++current_rock_num_;
+  ++currentRockNum_;
 
-  current_rock_num_ %= 3;
+  currentRockNum_ %= 3;
 
-  rock_num_ = current_rock_num_;
+  rockNum_ = currentRockNum_;
 
   //---
 
-  auto shape_mgr = CAsteroidsShapeMgrInst;
+  auto shape_mgr = app_.getShapeMgr();
 
-  switch (rock_num_) {
+  switch (rockNum_) {
     default:
     case 0: {
       setDrawCoords     (shape_mgr->drawPoints     (CAsteroidsShapeMgr::Type::ROCK1));

@@ -21,9 +21,9 @@ class CAsteroidsScore {
 
  private:
   const CAsteroids& app_;
-  int               score_;
-  double            size_;
-  int               lives_;
+  int               score_ { 0 };
+  double            size_  { 1.0 };
+  int               lives_ { 4 };
 };
 
 #endif

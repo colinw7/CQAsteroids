@@ -451,10 +451,12 @@ compiler_clean: compiler_moc_header_clean
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../obj/main.o main.cpp
 
 ../obj/CQAsteroids.o: CQAsteroids.cpp CQAsteroids.h \
-		../../CQUtil/include/CQUtil.h \
-		../../CUtil/include/CEvent.h \
+		CAsteroids.h \
+		../../CMath/include/CPoint2D.h \
+		../../CMath/include/CVector2D.h \
+		../../CMath/include/CMathGen.h \
+		../../COS/include/NaN.h \
 		../../CMath/include/CIPoint2D.h \
-		../../CUtil/include/CKeyType.h \
 		../../CUtil/include/CRGBA.h \
 		../../CUtil/include/CRGB.h \
 		../../CUtil/include/CRGBName.h \
@@ -465,6 +467,9 @@ compiler_clean: compiler_moc_header_clean
 		../../CUtil/include/CHSB.h \
 		../../CUtil/include/CHSI.h \
 		../../CMath/include/CMathRound.h \
+		../../CQUtil/include/CQUtil.h \
+		../../CUtil/include/CEvent.h \
+		../../CUtil/include/CKeyType.h \
 		../../CUtil/include/CLineDash.h \
 		../../CUtil/include/CILineDash.h \
 		../../CMath/include/CAngle.h \
@@ -483,17 +488,13 @@ compiler_clean: compiler_moc_header_clean
 		../../CMath/include/CISize2D.h \
 		../../CMath/include/CIBBox2D.h \
 		../../CMath/include/CIVector2D.h \
-		../../CMath/include/CMathGen.h \
-		../../COS/include/NaN.h \
 		../../CUtil/include/COptVal.h \
 		../../CImageLib/include/CImagePtr.h \
 		../../CImageLib/include/CImageMgr.h \
 		../../CStrUtil/include/CStrUtil.h \
 		../../CImageLib/include/CImageAnim.h \
 		../../CImageLib/include/CImageFile.h \
-		../../CMath/include/CPoint2D.h \
 		../../CMath/include/CBBox2D.h \
-		../../CMath/include/CVector2D.h \
 		../../CMath/include/CSize2D.h \
 		../../CMath/include/CMatrix2D.h \
 		../../CMath/include/CMathMacros.h \
@@ -534,7 +535,8 @@ compiler_clean: compiler_moc_header_clean
 		../../CUtil/include/CHSB.h \
 		../../CUtil/include/CHSI.h \
 		../../CMath/include/CMathRound.h \
-		CAsteroids.h
+		CAsteroids.h \
+		../../CMath/include/CMathRand.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../obj/CAsteroidsBigRock.o CAsteroidsBigRock.cpp
 
 ../obj/CAsteroidsBigSaucer.o: CAsteroidsBigSaucer.cpp CAsteroidsBigSaucer.h \
@@ -593,6 +595,10 @@ compiler_clean: compiler_moc_header_clean
 
 ../obj/CAsteroids.o: CAsteroids.cpp CAsteroids.h \
 		../../CMath/include/CPoint2D.h \
+		../../CMath/include/CVector2D.h \
+		../../CMath/include/CMathGen.h \
+		../../COS/include/NaN.h \
+		../../CMath/include/CIPoint2D.h \
 		../../CUtil/include/CRGBA.h \
 		../../CUtil/include/CRGB.h \
 		../../CUtil/include/CRGBName.h \
@@ -606,10 +612,6 @@ compiler_clean: compiler_moc_header_clean
 		CAsteroidsShip.h \
 		CAsteroidsObject.h \
 		../../CMath/include/CBBox2D.h \
-		../../CMath/include/CMathGen.h \
-		../../COS/include/NaN.h \
-		../../CMath/include/CIPoint2D.h \
-		../../CMath/include/CVector2D.h \
 		../../CMath/include/CSize2D.h \
 		../../CMath/include/CISize2D.h \
 		../../CMath/include/CMatrix2D.h \
@@ -618,6 +620,7 @@ compiler_clean: compiler_moc_header_clean
 		CAsteroidsSaucer.h \
 		CAsteroidsScore.h \
 		CAsteroidsExplosion.h \
+		CAsteroidsShapeMgr.h \
 		CAsteroidsRenderer.h \
 		../../CVFont/include/CLFont.h \
 		../../COS/include/COSUser.h \
@@ -647,7 +650,8 @@ compiler_clean: compiler_moc_header_clean
 		../../CUtil/include/CHSB.h \
 		../../CUtil/include/CHSI.h \
 		../../CMath/include/CMathRound.h \
-		CAsteroids.h
+		CAsteroids.h \
+		../../CMath/include/CMathRand.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../obj/CAsteroidsMediumRock.o CAsteroidsMediumRock.cpp
 
 ../obj/CAsteroidsObject.o: CAsteroidsObject.cpp CAsteroidsObject.h \
@@ -755,6 +759,10 @@ compiler_clean: compiler_moc_header_clean
 ../obj/CAsteroidsScore.o: CAsteroidsScore.cpp CAsteroidsScore.h \
 		CAsteroids.h \
 		../../CMath/include/CPoint2D.h \
+		../../CMath/include/CVector2D.h \
+		../../CMath/include/CMathGen.h \
+		../../COS/include/NaN.h \
+		../../CMath/include/CIPoint2D.h \
 		../../CUtil/include/CRGBA.h \
 		../../CUtil/include/CRGB.h \
 		../../CUtil/include/CRGBName.h \
@@ -822,6 +830,7 @@ compiler_clean: compiler_moc_header_clean
 		../../CUtil/include/CHSB.h \
 		../../CUtil/include/CHSI.h \
 		../../CMath/include/CMathRound.h \
+		CAsteroidsExplosion.h \
 		CAsteroids.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../obj/CAsteroidsSmallRock.o CAsteroidsSmallRock.cpp
 
