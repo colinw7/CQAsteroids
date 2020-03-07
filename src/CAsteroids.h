@@ -25,7 +25,8 @@ class CAsteroids {
 
  public:
   CAsteroids(CAsteroidsRenderer *renderer);
- ~CAsteroids();
+
+  virtual ~CAsteroids();
 
   CAsteroidsObjectMgr    *getObjectMgr   () const { return objectMgr_   ; }
   CAsteroidsSaucerMgr    *getSaucerMgr   () const { return saucerMgr_   ; }

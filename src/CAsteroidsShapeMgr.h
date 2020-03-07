@@ -26,6 +26,8 @@ class CAsteroidsShapeMgr {
  public:
   CAsteroidsShapeMgr(const CAsteroids &app);
 
+  const CAsteroids &app() const { return app_; }
+
   Points drawPoints(Type type);
   void setDrawPoints(Type type, const Points &points);
 

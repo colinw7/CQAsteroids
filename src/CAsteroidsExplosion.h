@@ -34,6 +34,8 @@ class CAsteroidsExplosion : public CAsteroidsObject {
 
  ~CAsteroidsExplosion();
 
+  CAsteroidsObject *parent() const { return parent_; }
+
   void init();
 
   void move() override;

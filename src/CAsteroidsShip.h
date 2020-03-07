@@ -37,7 +37,7 @@ class CAsteroidsShip : public CAsteroidsObject {
 
   bool hyperspace();
 
-  void destroy();
+  void destroy() override;
 
   void draw() override;
 
