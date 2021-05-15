@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'CQAsteroids.h'
 **
-** Created by: The Qt Meta Object Compiler version 67 (Qt 5.5.1)
+** Created by: The Qt Meta Object Compiler version 67 (Qt 5.12.8)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
@@ -12,12 +12,14 @@
 #if !defined(Q_MOC_OUTPUT_REVISION)
 #error "The header file 'CQAsteroids.h' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 67
-#error "This file was generated using the moc from 5.5.1. It"
+#error "This file was generated using the moc from 5.12.8. It"
 #error "cannot be used with the include files from this version of Qt."
 #error "(The moc has changed too much.)"
 #endif
 
 QT_BEGIN_MOC_NAMESPACE
+QT_WARNING_PUSH
+QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_CQAsteroidsApp_t {
     QByteArrayData data[5];
     char stringdata0[38];
@@ -43,7 +45,7 @@ QT_MOC_LITERAL(4, 30, 7) // "colored"
 static const uint qt_meta_data_CQAsteroidsApp[] = {
 
  // content:
-       7,       // revision
+       8,       // revision
        0,       // classname
        0,    0, // classinfo
        1,   14, // methods
@@ -69,7 +71,7 @@ static const uint qt_meta_data_CQAsteroidsApp[] = {
 void CQAsteroidsApp::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     if (_c == QMetaObject::InvokeMetaMethod) {
-        CQAsteroidsApp *_t = static_cast<CQAsteroidsApp *>(_o);
+        auto *_t = static_cast<CQAsteroidsApp *>(_o);
         Q_UNUSED(_t)
         switch (_id) {
         case 0: _t->update(); break;
@@ -78,7 +80,7 @@ void CQAsteroidsApp::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
     }
 #ifndef QT_NO_PROPERTIES
     else if (_c == QMetaObject::ReadProperty) {
-        CQAsteroidsApp *_t = static_cast<CQAsteroidsApp *>(_o);
+        auto *_t = static_cast<CQAsteroidsApp *>(_o);
         Q_UNUSED(_t)
         void *_v = _a[0];
         switch (_id) {
@@ -87,7 +89,7 @@ void CQAsteroidsApp::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
         default: break;
         }
     } else if (_c == QMetaObject::WriteProperty) {
-        CQAsteroidsApp *_t = static_cast<CQAsteroidsApp *>(_o);
+        auto *_t = static_cast<CQAsteroidsApp *>(_o);
         Q_UNUSED(_t)
         void *_v = _a[0];
         switch (_id) {
@@ -101,10 +103,14 @@ void CQAsteroidsApp::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
     Q_UNUSED(_a);
 }
 
-const QMetaObject CQAsteroidsApp::staticMetaObject = {
-    { &QWidget::staticMetaObject, qt_meta_stringdata_CQAsteroidsApp.data,
-      qt_meta_data_CQAsteroidsApp,  qt_static_metacall, Q_NULLPTR, Q_NULLPTR}
-};
+QT_INIT_METAOBJECT const QMetaObject CQAsteroidsApp::staticMetaObject = { {
+    &QWidget::staticMetaObject,
+    qt_meta_stringdata_CQAsteroidsApp.data,
+    qt_meta_data_CQAsteroidsApp,
+    qt_static_metacall,
+    nullptr,
+    nullptr
+} };
 
 
 const QMetaObject *CQAsteroidsApp::metaObject() const
@@ -114,9 +120,9 @@ const QMetaObject *CQAsteroidsApp::metaObject() const
 
 void *CQAsteroidsApp::qt_metacast(const char *_clname)
 {
-    if (!_clname) return Q_NULLPTR;
+    if (!_clname) return nullptr;
     if (!strcmp(_clname, qt_meta_stringdata_CQAsteroidsApp.stringdata0))
-        return static_cast<void*>(const_cast< CQAsteroidsApp*>(this));
+        return static_cast<void*>(this);
     return QWidget::qt_metacast(_clname);
 }
 
@@ -135,7 +141,7 @@ int CQAsteroidsApp::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
         _id -= 1;
     }
 #ifndef QT_NO_PROPERTIES
-   else if (_c == QMetaObject::ReadProperty || _c == QMetaObject::WriteProperty
+    else if (_c == QMetaObject::ReadProperty || _c == QMetaObject::WriteProperty
             || _c == QMetaObject::ResetProperty || _c == QMetaObject::RegisterPropertyMetaType) {
         qt_static_metacall(this, _c, _id, _a);
         _id -= 2;
@@ -153,4 +159,5 @@ int CQAsteroidsApp::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 #endif // QT_NO_PROPERTIES
     return _id;
 }
+QT_WARNING_POP
 QT_END_MOC_NAMESPACE
