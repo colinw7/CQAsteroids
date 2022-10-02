@@ -258,7 +258,7 @@ void
 CAsteroids::
 drawCenteredString(const CPoint2D &p, double size, const std::string &str) const
 {
-  drawString(CPoint2D(p.x - size*str.size()/2.0, p.y), size, str);
+  drawString(CPoint2D(p.x - size*double(str.size())/2.0, p.y), size, str);
 }
 
 void
@@ -283,7 +283,7 @@ drawChar(const CPoint2D &p, double size, char c) const
   const CLFontDef &font_def = CLFont::getFontDef(c);
 
   for (std::size_t i = 0; i < font_def.lines().size(); ++i) {
-    const CLFontLine &line = font_def.getLine(i);
+    const CLFontLine &line = font_def.getLine(int(i));
 
     double x1 = line.start().x*size;
     double y1 = line.start().y*size;

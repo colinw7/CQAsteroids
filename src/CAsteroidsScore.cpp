@@ -45,9 +45,9 @@ draw()
   double x = 0.01;
   double y = 0.96;
 
-  int len = str.size();
+  auto len = str.size();
 
-  for (int i = 0; i < len; ++i) {
+  for (uint i = 0; i < len; ++i) {
     app_.drawChar(CPoint2D(x, y), size_, str[i]);
 
     x += size_;

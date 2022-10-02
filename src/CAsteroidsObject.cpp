@@ -264,7 +264,7 @@ pointInside(const CPoint2D &p) const
   if (! bbox_.inside(p.x, p.y))
     return false;
 
-  if (! CMathGeom2D::PointInsideConvex(p, &coll_coords1_[0], coll_coords_.size()))
+  if (! CMathGeom2D::PointInsideConvex(p, &coll_coords1_[0], uint(coll_coords_.size())))
     return false;
 
   return true;

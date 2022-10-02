@@ -9,6 +9,7 @@
 #include <QApplication>
 #include <QHBoxLayout>
 #include <QPainter>
+#include <QPainterPath>
 #include <QTimer>
 #include <QKeyEvent>
 

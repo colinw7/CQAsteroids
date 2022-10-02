@@ -41,13 +41,13 @@ class CAsteroidsShapeMgr {
   Type nextType(Type type) {
     if (type == Type::BULLET) return type;
 
-    return (Type)(int(type) + 1);
+    return Type(int(type) + 1);
   }
 
   Type prevType(Type type) {
     if (type == Type::SHIP) return type;
 
-    return (Type)(int(type) - 1);
+    return Type(int(type) - 1);
   }
 
   std::string typeName(Type type) const;

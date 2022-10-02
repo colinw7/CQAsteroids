@@ -20,7 +20,7 @@ int
 CAsteroidsBulletMgr::
 getNumBullets()
 {
-  return bullets_.size();
+  return int(bullets_.size());
 }
 
 CAsteroidsBullet *

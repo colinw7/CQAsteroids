@@ -12,7 +12,7 @@ DESTDIR     = ../bin
 OBJECTS_DIR = ../obj
 LIB_DIR     = ../lib
 
-QMAKE_CXXFLAGS += -std=c++14
+QMAKE_CXXFLAGS += -std=c++17
 
 INCLUDEPATH += \
 . \

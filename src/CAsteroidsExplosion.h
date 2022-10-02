@@ -50,8 +50,8 @@ class CAsteroidsExplosion : public CAsteroidsObject {
     double    da   { 0.0 };
     int       life { 0 };
 
-    Line(const CPoint2D &p1, const CPoint2D &p2) :
-     p1(p1), p2(p2) {
+    Line(const CPoint2D &p1_, const CPoint2D &p2_) :
+     p1(p1_), p2(p2_) {
     }
   };
 
