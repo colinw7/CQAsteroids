@@ -1,18 +1,19 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'CQAsteroids.h'
 **
-** Created by: The Qt Meta Object Compiler version 67 (Qt 5.12.8)
+** Created by: The Qt Meta Object Compiler version 67 (Qt 5.15.3)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
 
+#include <memory>
 #include "../CQAsteroids.h"
 #include <QtCore/qbytearray.h>
 #include <QtCore/qmetatype.h>
 #if !defined(Q_MOC_OUTPUT_REVISION)
 #error "The header file 'CQAsteroids.h' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 67
-#error "This file was generated using the moc from 5.12.8. It"
+#error "This file was generated using the moc from 5.15.3. It"
 #error "cannot be used with the include files from this version of Qt."
 #error "(The moc has changed too much.)"
 #endif
@@ -72,7 +73,7 @@ void CQAsteroidsApp::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
 {
     if (_c == QMetaObject::InvokeMetaMethod) {
         auto *_t = static_cast<CQAsteroidsApp *>(_o);
-        Q_UNUSED(_t)
+        (void)_t;
         switch (_id) {
         case 0: _t->update(); break;
         default: ;
@@ -81,7 +82,7 @@ void CQAsteroidsApp::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
 #ifndef QT_NO_PROPERTIES
     else if (_c == QMetaObject::ReadProperty) {
         auto *_t = static_cast<CQAsteroidsApp *>(_o);
-        Q_UNUSED(_t)
+        (void)_t;
         void *_v = _a[0];
         switch (_id) {
         case 0: *reinterpret_cast< bool*>(_v) = _t->isFilled(); break;
@@ -90,7 +91,7 @@ void CQAsteroidsApp::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
         }
     } else if (_c == QMetaObject::WriteProperty) {
         auto *_t = static_cast<CQAsteroidsApp *>(_o);
-        Q_UNUSED(_t)
+        (void)_t;
         void *_v = _a[0];
         switch (_id) {
         case 0: _t->setFilled(*reinterpret_cast< bool*>(_v)); break;
@@ -100,11 +101,11 @@ void CQAsteroidsApp::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
     } else if (_c == QMetaObject::ResetProperty) {
     }
 #endif // QT_NO_PROPERTIES
-    Q_UNUSED(_a);
+    (void)_a;
 }
 
 QT_INIT_METAOBJECT const QMetaObject CQAsteroidsApp::staticMetaObject = { {
-    &QWidget::staticMetaObject,
+    QMetaObject::SuperData::link<QWidget::staticMetaObject>(),
     qt_meta_stringdata_CQAsteroidsApp.data,
     qt_meta_data_CQAsteroidsApp,
     qt_static_metacall,

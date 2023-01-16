@@ -2,6 +2,8 @@
 #include <CAsteroids.h>
 
 #include <CQUtil.h>
+#include <CQUtilRGBA.h>
+#include <CQUtilGeom.h>
 #include <CQCanvas2D.h>
 #include <CQSound.h>
 #include <CDisplayRange2D.h>
