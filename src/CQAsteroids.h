@@ -44,7 +44,7 @@ class CQAsteroidsApp : public QWidget {
 
   void playSound(const std::string &name);
 
-  QSize sizeHint() const { return QSize(1200,1200); }
+  QSize sizeHint() const override { return QSize(1200,1200); }
 
  private slots:
   void update();

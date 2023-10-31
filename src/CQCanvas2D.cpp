@@ -1,11 +1,13 @@
 #include <CQCanvas2D.h>
 #include <CQUtil.h>
+#include <CQUtilGeom.h>
+#include <CQUtilEvent.h>
 
 #include <QPainter>
 
 CQCanvas2D::
 CQCanvas2D(QWidget *parent) :
- QWidget(parent), image_(0), ipainter_(0), w_(0), h_(0),
+ QWidget(parent), image_(nullptr), ipainter_(nullptr), w_(0), h_(0),
  changed_(true), bg_(255, 255, 255), rangeSet_(false), pressed_(false)
 {
   setFocusPolicy(Qt::StrongFocus);
@@ -26,7 +28,7 @@ paintEvent(QPaintEvent *)
 
   if (changed_) {
     if (rangeSet_)
-      ipainter_->setWorldMatrix(CQUtil::toQMatrix(range_.getMatrix()));
+      ipainter_->setWorldTransform(CQUtil::toQTransform(range_.getMatrix()));
 
     drawContents(ipainter_);
 

@@ -19,9 +19,8 @@ class Canvas : public CQCanvas2D {
  public:
   Canvas(CQAsteroidsApp *asteroids);
 
-  void keyPressEvent(QKeyEvent *e);
-
-  void keyReleaseEvent(QKeyEvent *e);
+  void keyPressEvent  (QKeyEvent *e) override;
+  void keyReleaseEvent(QKeyEvent *e) override;
 
  private:
   CQAsteroidsApp *asteroids_;

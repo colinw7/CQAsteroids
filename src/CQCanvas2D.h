@@ -48,29 +48,30 @@ class CQCanvas2D : public QWidget {
   void windowLengthToPixel(double x, double y, double *px, double *py);
 
  protected:
-  void paintEvent(QPaintEvent *e);
-  void resizeEvent(QResizeEvent *e);
+  void paintEvent(QPaintEvent *e) override;
+  void resizeEvent(QResizeEvent *e) override;
 
-  virtual void mousePressEvent(QMouseEvent *);
-  virtual void mouseReleaseEvent(QMouseEvent *);
-  virtual void mouseDoubleClickEvent(QMouseEvent *);
-  virtual void mouseMoveEvent(QMouseEvent *);
+  virtual void mousePressEvent(QMouseEvent *) override;
+  virtual void mouseReleaseEvent(QMouseEvent *) override;
+  virtual void mouseDoubleClickEvent(QMouseEvent *) override;
+  virtual void mouseMoveEvent(QMouseEvent *) override;
 
-  virtual void keyPressEvent(QKeyEvent *);
-  virtual void keyReleaseEvent(QKeyEvent *);
+  virtual void keyPressEvent(QKeyEvent *) override;
+  virtual void keyReleaseEvent(QKeyEvent *) override;
 
  public slots:
   void setChangedSlot();
 
  private:
-  QImage          *image_;
-  QPainter        *ipainter_;
-  int              w_, h_;
-  bool             changed_;
+  QImage          *image_    { nullptr };
+  QPainter        *ipainter_ { nullptr };
+  int              w_        { 0 };
+  int              h_        { 0 };
+  bool             changed_  { false };
   QColor           bg_;
   CDisplayRange2D  range_;
-  bool             rangeSet_;
-  bool             pressed_;
+  bool             rangeSet_ { false };
+  bool             pressed_  { false };
 };
 
 #endif
